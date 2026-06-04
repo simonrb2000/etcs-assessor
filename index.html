@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ETCS Assessor">
+<meta name="theme-color" content="#1a4a8a">
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;ETCS Assessor&quot;,&quot;short_name&quot;:&quot;ETCS&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23f5f4f0&quot;,&quot;theme_color&quot;:&quot;%231a4a8a&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231a4a8a'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E🚂%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+<title>ETCS Assessor</title>
+<style>
+:root{
+  --bg:#f5f4f0;--surface:#fff;--border:#e0ddd6;--border2:#ccc9c0;
+  --text:#1a1917;--text2:#5a5750;--text3:#8a8780;
+  --accent:#1a4a8a;--al:#e8eef7;
+  --green:#1a6b3a;--gl:#e6f4ec;
+  --amber:#7a4f00;--ambl:#fef3dc;
+  --danger:#8a1a1a;--dl:#f7e8e8;
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;max-width:480px;margin:0 auto;min-height:100vh;}
+/* HEADER */
+.hdr{background:var(--accent);color:white;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.hdr-back{font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.15);}
+.hdr-title{font-size:17px;font-weight:700;flex:1;}
+.hdr-sub{font-size:12px;opacity:.7;}
+.hdr-action{font-size:13px;font-weight:700;padding:6px 12px;background:rgba(255,255,255,.2);border-radius:6px;cursor:pointer;}
+/* PAGES */
+.page{display:none;padding:16px;padding-bottom:40px;}
+.page.on{display:block;}
+/* CARDS */
+.card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.card-title{font-weight:700;font-size:15px;margin-bottom:2px;}
+.card-sub{font-size:12px;color:var(--text2);}
+/* BUTTONS */
+.btn{display:block;width:100%;padding:13px;border-radius:var(--r);border:none;font-size:15px;font-weight:700;cursor:pointer;text-align:center;margin-bottom:10px;}
+.btn-blue{background:var(--accent);color:white;}
+.btn-green{background:var(--green);color:white;}
+.btn-outline{background:white;border:1.5px solid var(--border2);color:var(--text2);}
+.btn-danger{background:var(--dl);color:var(--danger);border:1px solid rgba(138,26,26,.2);}
+.btn-sm{padding:8px 14px;font-size:13px;width:auto;display:inline-block;}
+/* FORMS */
+.fg{margin-bottom:12px;}
+.fg label,.form-lbl{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
+.fg input,.fg select,.fg textarea,
+.form-input{width:100%;padding:11px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-size:15px;font-family:-apple-system,Arial,sans-serif;background:white;color:var(--text);-webkit-appearance:none;appearance:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus,.form-input:focus{outline:none;border-color:var(--accent);}
+.fg textarea{resize:vertical;min-height:72px;line-height:1.5;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+/* SECTION HEADERS */
+.sec{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.sec:first-child{margin-top:0;}
+/* RADIO OPTS */
+.radio-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.ropt{display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border:1.5px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:14px;}
+.ropt.on{background:var(--al);border-color:var(--accent);font-weight:600;}
+.ropt input[type=radio]{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0;}
+/* TABS */
+.tabs{display:flex;background:white;border-bottom:2px solid var(--border);position:sticky;top:52px;z-index:90;overflow-x:auto;}
+.tab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;min-width:55px;}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-panel{display:none;padding:14px 16px 40px;}
+.tab-panel.on{display:block;}
+/* TOPIC ITEMS */
+.topic-group-label{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.topic-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;}
+.topic-item.C{background:var(--gl);border-color:rgba(26,107,58,.3);}
+.topic-item.A{background:var(--ambl);border-color:rgba(122,79,0,.3);}
+.topic-item.R{background:var(--dl);border-color:rgba(138,26,26,.3);}
+.topic-badge{width:26px;height:26px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:white;}
+.topic-item.C .topic-badge{background:var(--green);border-color:var(--green);color:white;}
+.topic-item.A .topic-badge{background:var(--amber);border-color:var(--amber);color:white;}
+.topic-item.R .topic-badge{background:var(--danger);border-color:var(--danger);color:white;}
+.topic-name{font-size:14px;font-weight:600;flex:1;}
+.topic-prev{font-size:11px;color:var(--text3);}
+/* TRAIN SLOTS */
+.train-slot{background:white;border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+.train-slot.active{border-color:var(--accent);background:var(--al);}
+.train-slot-num{font-weight:700;font-size:14px;}
+.train-slot-hint{font-size:12px;color:var(--text3);}
+.train-card{background:white;border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:4px;}
+.train-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.train-card-hc{font-weight:700;font-size:15px;}
+.train-card-sub{font-size:12px;color:var(--text2);}
+.train-edit-btn{font-size:12px;color:var(--accent);font-weight:700;padding:4px 10px;background:var(--al);border-radius:6px;}
+/* TRAIN FORM */
+.train-form{background:white;border:1.5px solid var(--accent);border-radius:var(--r);padding:14px;margin-bottom:8px;display:none;}
+/* STATION SEARCH */
+.stn-wrap{position:relative;}
+.stn-drop{display:none;position:absolute;left:0;right:0;top:100%;background:white;border:1.5px solid var(--accent);border-radius:0 0 var(--r) var(--r);z-index:200;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.stn-drop.open{display:block;}
+.stn-opt{padding:10px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border);}
+.stn-opt:last-child{border-bottom:none;}
+.stn-opt:active{background:var(--al);}
+.stn-code{font-weight:700;margin-right:8px;color:var(--accent);}
+/* DRA / YN OPTS */
+.yn-opts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.yn-opt{padding:8px 14px;border-radius:var(--r);border:1.5px solid var(--border2);font-size:14px;cursor:pointer;background:white;}
+.yn-opt.on-y{background:var(--gl);border-color:var(--green);color:var(--green);font-weight:700;}
+.yn-opt.on-n{background:var(--dl);border-color:var(--danger);color:var(--danger);font-weight:700;}
+.yn-opt.on-na{background:var(--al);border-color:var(--accent);color:var(--accent);font-weight:700;}
+/* TRANSITIONS */
+.trans-block{background:var(--al);border:1px solid rgba(26,74,138,.2);border-radius:var(--r);padding:12px;margin-bottom:10px;}
+.trans-block-title{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.trans-row{margin-bottom:10px;}
+.trans-lbl{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:5px;}
+.info-box{background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5;}
+/* EOA */
+.eoa-item{background:var(--al);border:1px solid rgba(26,74,138,.2);border-radius:var(--r);padding:10px 12px;margin-bottom:6px;}
+.eoa-item-hdr{display:flex;align-items:center;justify-content:space-between;}
+.eoa-ref{font-weight:700;font-size:14px;color:var(--accent);}
+.eoa-del{color:var(--danger);font-size:18px;padding:2px 6px;}
+.eoa-detail{font-size:12px;color:var(--text2);margin-top:3px;}
+.eoa-form{background:white;border:1.5px solid var(--border);border-radius:var(--r);padding:14px;margin-top:8px;display:none;}
+/* FEEDBACK */
+.fb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;}
+.fb-item.on{background:var(--gl);border-color:rgba(26,107,58,.3);}
+.fb-tick{width:24px;height:24px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.fb-item.on .fb-tick{background:var(--green);border-color:var(--green);color:white;}
+.fb-name{font-size:14px;flex:1;}
+/* EXPORT */
+.code-box{background:#1a1917;color:#a8e6a3;font-family:monospace;font-size:11px;padding:12px;border-radius:var(--r);word-break:break-all;line-height:1.6;margin-bottom:10px;min-height:60px;}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1917;color:white;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:600;z-index:9999;pointer-events:none;transition:opacity .3s;}
+/* DIRECTION BADGE */
+.dir-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;}
+.dir-nb{background:var(--gl);color:var(--green);border:1.5px solid rgba(26,107,58,.3);}
+.dir-sb{background:var(--ambl);color:var(--amber);border:1.5px solid rgba(122,79,0,.3);}
+/* UTILS */
+.hidden{display:none!important;}
+.notes-input{width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:-apple-system,Arial,sans-serif;background:white;color:var(--text);}
+.notes-input:focus{outline:none;border-color:var(--accent);}
+.ta-saved{background:var(--gl);border:1px solid rgba(26,107,58,.2);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--green);font-weight:600;margin-top:8px;}
+.empty-hint{text-align:center;color:var(--text3);font-size:13px;padding:20px 0;}
+.chk-issues{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.chk-issue{padding:6px 12px;border-radius:6px;border:1.5px solid var(--border2);font-size:13px;cursor:pointer;background:white;}
+.chk-issue.on{background:var(--dl);border-color:var(--danger);color:var(--danger);font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- HOME PAGE -->
+<div class="page on" id="page-home">
+  <div class="hdr">
+    <div class="hdr-title">ETCS Assessor</div>
+    <div class="hdr-action" onclick="showPage('add-cand')">+ New</div>
+  </div>
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="sec" style="margin:0;border:none;">Candidates</div>
+      <button class="btn btn-outline btn-sm" onclick="renderHome();toast('Refreshed')">&#8635; Refresh</button>
+    </div>
+    <div id="cand-list"><div class="empty-hint">No candidates yet. Tap + New to add one.</div></div>
+  </div>
+</div>
+
+<!-- ADD CANDIDATE PAGE -->
+<div class="page" id="page-add-cand">
+  <div class="hdr">
+    <div class="hdr-back" onclick="showPage('home')">&#8592;</div>
+    <div class="hdr-title">New Candidate</div>
+  </div>
+  <div style="padding:16px;">
+    <div class="fg"><label>Full Name</label><input type="text" id="nc-name" placeholder="e.g. Simon Cowley" autocapitalize="words"></div>
+    <div class="fg"><label>Depot</label>
+      <select id="nc-depot">
+        <option value="">— Select depot —</option>
+        <option>Welwyn Garden City</option><option>Hornsey Fleet Link</option>
+        <option>Peterborough</option><option>Cambridge</option><option>Hitchin</option>
+        <option>Bedford</option><option>Luton</option><option>St Albans</option>
+        <option>Cricklewood</option><option>Brighton</option>
+      </select>
+    </div>
+    <div class="fg"><label>Gender</label>
+      <select id="nc-gender">
+        <option value="m">Male</option>
+        <option value="f">Female</option>
+      </select>
+    </div>
+    <button class="btn btn-blue" onclick="addCandidate()">Add Candidate</button>
+    <button class="btn btn-outline" onclick="showPage('home')">Cancel</button>
+  </div>
+</div>
+
+<!-- CANDIDATE PAGE (day list) -->
+<div class="page" id="page-cand">
+  <div class="hdr">
+    <div class="hdr-back" onclick="showPage('home')">&#8592;</div>
+    <div>
+      <div class="hdr-title" id="cand-page-name">Candidate</div>
+      <div class="hdr-sub" id="cand-page-depot"></div>
+    </div>
+    <div class="hdr-action" onclick="addDay()">+ Day</div>
+  </div>
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="sec" style="margin:0;border:none;">Assessment Days</div>
+      <button class="btn btn-outline btn-sm" onclick="renderDayList();toast('Refreshed')">&#8635; Refresh</button>
+    </div>
+    <div id="day-list"></div>
+    <button class="btn btn-danger btn-sm" style="margin-top:20px;" onclick="deleteCandidate()">Delete Candidate</button>
+  </div>
+</div>
+
+<!-- DAY PAGE -->
+<div class="page" id="page-day">
+  <div class="hdr">
+    <div class="hdr-back" onclick="leaveDayPage()">&#8592;</div>
+    <div>
+      <div class="hdr-title" id="day-page-title">Day</div>
+      <div class="hdr-sub" id="day-page-sub"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="save-indicator" style="font-size:11px;color:rgba(255,255,255,.6);transition:opacity .5s;opacity:0;">&#10003; Saved</div>
+      <div class="hdr-action" onclick="showTab('export',document.querySelectorAll('#day-tabs .tab')[4])">Export</div>
+    </div>
+  </div>
+  <div class="tabs" id="day-tabs">
+    <div class="tab on" onclick="showTab('details',this)">Details</div>
+    <div class="tab" onclick="showTab('trains',this)">Trains</div>
+    <div class="tab" onclick="showTab('topics',this)">Topics</div>
+    <div class="tab" onclick="showTab('feedback',this)">Feedback</div>
+    <div class="tab" onclick="showTab('ta',this)">TA</div>
+    <div class="tab" onclick="showTab('export',this)">Export</div>
+  </div>
+
+  <!-- DETAILS TAB -->
+  <div class="tab-panel on" id="tp-details">
+    <div class="sec">Day Info</div>
+    <div class="form-row">
+      <div class="fg"><label>Date</label><input type="date" id="d-date" oninput="saveDetail('date',this.value)"></div>
+      <div class="fg"><label>Day</label>
+        <select id="d-day" onchange="saveDetail('day',this.value);updateDayFlags()">
+          <option value="1">Day 1</option><option value="2">Day 2</option>
+          <option value="3">Day 3</option><option value="3s">Day 3 &amp; Sum.</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sec">Assessor Info</div>
+    <div class="fg"><label>First day with you?</label>
+      <select id="d-first-with-me" onchange="saveDetail('firstWithMe',this.value);updateDayFlags()">
+        <option value="yes">Yes — first session with me</option>
+        <option value="no">No — I have assessed them before</option>
+      </select>
+    </div>
+    <div id="prev-assessors-wrap"></div>
+
+    <div class="sec">Meeting</div>
+    <div class="fg"><label>Met at</label>
+      <select id="d-met-at" onchange="saveDetail('metAt',this.value)">
+        <option value="FPK">Finsbury Park</option>
+        <option value="STP">St Pancras International</option>
+        <option value="WHP">West Hampstead Thameslink</option>
+        <option value="LBG">London Bridge</option>
+        <option value="BFR">Blackfriars</option>
+        <option value="EPH">Elephant &amp; Castle</option>
+        <option value="ECR">East Croydon</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="fg"><label>How met</label>
+      <select id="d-met-how" onchange="saveDetail('metHow',this.value)">
+        <option value="station">Met at station as planned</option>
+        <option value="onboard">Met on train at station</option>
+        <option value="enroute">Met en route</option>
+      </select>
+    </div>
+
+    <div class="sec">Candidate Experience</div>
+    <div id="ncl-exp-wrap" class="hidden">
+      <div class="fg"><label>NCL Experience</label>
+        <select id="d-ncl-exp" onchange="saveDetail('nclExp',this.value)">
+          <option value="sa">Signals Away (current)</option>
+          <option value="overlay">Drove during Overlay period</option>
+        </select>
+      </div>
+    </div>
+    <div id="zero-exp-wrap" class="hidden">
+      <div class="fg"><label>Observed ETCS during initial DI training?</label>
+        <select id="d-di-observed" onchange="saveDetail('diObserved',this.value)">
+          <option value="no">No — no previous exposure</option>
+          <option value="yes">Yes — some familiarity</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Previous depot experience?</label>
+      <select id="d-prev-depot" onchange="saveDetail('prevDepot',this.value)">
+        <option value="">None</option>
+        <option>Welwyn Garden City</option><option>Hornsey Fleet Link</option>
+        <option>Peterborough</option><option>Cambridge</option><option>Hitchin</option>
+        <option>Bedford</option><option>Luton</option><option>St Albans</option>
+        <option>Cricklewood</option><option>Brighton</option>
+      </select>
+    </div>
+
+    <div class="sec">Training Agreement</div>
+    <div class="radio-opts" id="ta-opts">
+      <label class="ropt on" data-val="none"><input type="radio" name="ta" value="none" checked> No mention</label>
+      <label class="ropt" data-val="new"><input type="radio" name="ta" value="new"> New agreement completed &amp; attached</label>
+      <label class="ropt" data-val="prev"><input type="radio" name="ta" value="prev"> Took over previous agreement</label>
+    </div>
+    <div id="ta-status" style="font-size:12px;color:var(--green);display:none;">&#10003; Training agreement saved &mdash; <span style="color:var(--accent);cursor:pointer;" onclick="showTab('ta',document.querySelectorAll('#day-tabs .tab')[5])">Edit in TA tab</span></div>
+
+    <div class="sec">Previous Advice / Reviews</div>
+    <textarea class="notes-input" id="d-prev-advice" placeholder="Paste previous advice here or leave blank..." oninput="saveDetail('prevAdvice',this.value)"></textarea>
+
+    <div class="sec" style="margin-top:16px;">Feedback to Candidate</div>
+    <textarea class="notes-input" id="d-feedback" placeholder="Feedback given to candidate..." oninput="saveDetail('feedback',this.value)" style="min-height:80px;margin-top:4px;"></textarea>
+
+    <div class="sec">Out of Course / Unusual</div>
+    <textarea class="notes-input" id="d-ooc" placeholder="Out of course discussions..." oninput="saveDetail('ooc',this.value)" style="margin-top:4px;"></textarea>
+
+    <div class="sec">Advice Given Today</div>
+    <textarea class="notes-input" id="d-advice" placeholder="Advice given..." oninput="saveDetail('advice',this.value)" style="margin-top:4px;"></textarea>
+  </div>
+
+  <!-- TRAINS TAB -->
+  <div class="tab-panel" id="tp-trains">
+    <div id="train-list"></div>
+    <div id="train-form" class="train-form">
+      <div style="font-weight:700;font-size:15px;margin-bottom:12px;" id="train-form-title">Train</div>
+      <div class="form-row">
+        <div><span class="form-lbl">Headcode</span><input type="text" id="t-hc" class="form-input" placeholder="9Y13" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false" oninput="this.value=this.value.toUpperCase()"></div>
+        <div><span class="form-lbl">Time</span><input type="text" id="t-time" class="form-input" placeholder="07:59" inputmode="numeric" oninput="autoFormatTime(this)"></div>
+      </div>
+      <div class="form-row">
+        <div>
+          <span class="form-lbl">From</span>
+          <div class="stn-wrap">
+            <input type="text" id="t-from" class="form-input" placeholder="Station" oninput="filterStn('t-from','drop-from',this.value)" autocomplete="off">
+            <div class="stn-drop" id="drop-from"></div>
+          </div>
+        </div>
+        <div>
+          <span class="form-lbl">To</span>
+          <div class="stn-wrap">
+            <input type="text" id="t-to" class="form-input" placeholder="Station" oninput="filterStn('t-to','drop-to',this.value)" autocomplete="off">
+            <div class="stn-drop" id="drop-to"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div><span class="form-lbl">Unit</span><input type="text" id="t-unit" class="form-input" value="700" inputmode="numeric"></div>
+        <div><span class="form-lbl">Mode</span>
+          <select id="t-mode" class="form-input" onchange="buildTransitions()">
+            <option>ATO</option><option>Manual</option><option>ATO / Manual</option><option>Observed</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Direction -->
+      <div id="direction-row" style="margin-bottom:10px;display:none;">
+        <span class="form-lbl">Direction</span>
+        <div id="dir-badge-wrap"></div>
+      </div>
+
+      <!-- Short MA -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px;">
+        <span style="font-size:13px;font-weight:600;color:var(--text2);">Short MA(s) on this journey</span>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" id="t-short-ma" style="width:18px;height:18px;accent-color:var(--accent);" onchange="toggleShortMA(this.checked)">
+          <span style="font-size:13px;">Yes</span>
+        </label>
+      </div>
+      <div id="short-ma-notes-wrap" class="hidden">
+        <input type="text" id="t-short-ma-notes" class="form-input" placeholder="Short MA notes..." style="margin-bottom:10px;">
+      </div>
+
+      <!-- EoA Events -->
+      <div class="sec">EoA Events</div>
+      <div id="eoa-list"></div>
+      <button class="btn btn-outline btn-sm" onclick="showEoaForm()" style="margin-bottom:10px;">+ Add EoA Event</button>
+
+      <!-- EoA Form -->
+      <div class="eoa-form" id="eoa-form">
+        <div style="font-weight:700;font-size:14px;margin-bottom:10px;" id="eoa-form-title">New EoA Event</div>
+        <span class="form-lbl">Type</span>
+        <div class="yn-opts" id="eoa-type-opts" style="margin-bottom:10px;">
+          <div class="yn-opt on-y" data-etype="stopped">Stopped</div>
+          <div class="yn-opt" data-etype="cleared">Cleared</div>
+        </div>
+        <div class="form-row">
+          <div><span class="form-lbl">EoA Reference</span><input type="text" id="e-ref" class="form-input" placeholder="TVS1234" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters" autocomplete="off"></div>
+          <div id="e-mode-wrap">
+            <span class="form-lbl">Mode at EoA</span>
+            <select id="e-mode" class="form-input"><option>ATO</option><option>Manual</option></select>
+          </div>
+        </div>
+        <span class="form-lbl">Location / Name</span>
+        <div class="stn-wrap" style="margin-bottom:10px;">
+          <input type="text" id="e-loc" class="form-input" placeholder="Station or e.g. Smithfields" oninput="filterStnEoa(this.value)" autocomplete="off">
+          <div class="stn-drop" id="drop-eoa"></div>
+        </div>
+        <div id="e-pos-wrap" class="hidden" style="margin-bottom:10px;">
+          <span class="form-lbl">Stop Position</span>
+          <div class="yn-opts" id="eoa-pos-opts">
+            <div class="yn-opt" data-pos="outside">Outside</div>
+            <div class="yn-opt" data-pos="start">Start</div>
+            <div class="yn-opt" data-pos="mid">Mid</div>
+            <div class="yn-opt on-y" data-pos="end">End</div>
+          </div>
+        </div>
+        <span class="form-lbl" id="e-dist-lbl">Distance from EoA/Marker Board</span>
+        <select id="e-distance" class="form-input" style="margin-bottom:10px;">
+          <option value="">— Select —</option>
+          <option>0M</option><option>10M</option><option>20M</option><option>30M</option><option>40M</option>
+          <option>50M</option><option>60M</option><option>70M</option><option>80M</option><option>90M</option>
+          <option>100M</option><option>120M</option><option>150M</option><option>200M+</option>
+        </select>
+        <div id="e-dra-wrap" style="margin-bottom:10px;">
+          <span class="form-lbl">DRA</span>
+          <div class="yn-opts" id="eoa-dra-opts">
+            <div class="yn-opt on-na" data-dra="na">N/A</div>
+            <div class="yn-opt" data-dra="correct">&#10003; Correct</div>
+            <div class="yn-opt" data-dra="incorrect">&#10007; Incorrect</div>
+          </div>
+          <div id="e-dra-notes-wrap" class="hidden">
+            <input type="text" id="e-dra-notes" class="form-input" placeholder="DRA advice given...">
+          </div>
+        </div>
+        <span class="form-lbl" id="e-approach-lbl">Approach — under control and ready to stop?</span>
+        <div class="yn-opts" id="eoa-approach-opts" style="margin-bottom:6px;">
+          <div class="yn-opt on-na" data-app="na">N/A</div>
+          <div class="yn-opt" data-app="good">&#10003; Good</div>
+          <div class="yn-opt" data-app="poor">&#10007; Poor</div>
+        </div>
+        <div id="e-approach-notes-wrap" class="hidden" style="margin-bottom:10px;">
+          <input type="text" id="e-approach-notes" class="form-input" placeholder="Approach notes...">
+        </div>
+        <div id="e-stopped-wrap" style="margin-bottom:10px;">
+          <span class="form-lbl">Stopped correctly?</span>
+          <div class="yn-opts" id="eoa-stopped-opts">
+            <div class="yn-opt on-na" data-stopped="na">N/A</div>
+            <div class="yn-opt" data-stopped="good">&#10003; Yes</div>
+            <div class="yn-opt" data-stopped="poor">&#10007; No</div>
+          </div>
+          <div id="e-stopped-notes-wrap" class="hidden">
+            <input type="text" id="e-stopped-notes" class="form-input" placeholder="Notes on stop...">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-blue" style="flex:1;margin:0;" onclick="saveEoa()">Save EoA</button>
+          <button class="btn btn-outline" style="flex:1;margin:0;" onclick="cancelEoa()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Transitions -->
+      <div class="sec">Transitions</div>
+      <div id="transitions-wrap"></div>
+
+      <!-- General DRA -->
+      <div class="sec">General DRA (Overall Journey)</div>
+      <div class="yn-opts" id="t-dra-opts">
+        <div class="yn-opt on-na" data-dra="na">N/A</div>
+        <div class="yn-opt" data-dra="correct">&#10003; Correct</div>
+        <div class="yn-opt" data-dra="incorrect">&#10007; Incorrect</div>
+      </div>
+      <div id="t-dra-notes-wrap" class="hidden">
+        <input type="text" id="t-dra-notes" class="form-input" placeholder="DRA notes..." style="margin-bottom:10px;">
+      </div>
+
+      <div class="fg"><label>Train Notes</label><textarea id="t-notes" class="notes-input" placeholder="Any other notes..."></textarea></div>
+
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-blue" style="flex:1;margin:0;" onclick="saveTrain()">Save Train</button>
+        <button class="btn btn-outline" style="flex:1;margin:0;" onclick="cancelTrain()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPICS TAB -->
+  <div class="tab-panel" id="tp-topics">
+    <div id="topics-wrap"></div>
+    <div class="sec">Personal Attributes</div>
+    <div id="attr-wrap"></div>
+  </div>
+
+  <!-- FEEDBACK TAB -->
+  <div class="tab-panel" id="tp-feedback">
+    <div class="sec">Highlights — What Went Well</div>
+    <div id="fb-good-list"><div class="empty-hint">Tick topics in the Topics tab first</div></div>
+    <div class="sec">Struggled With</div>
+    <div id="fb-struggled-list"><div class="empty-hint">Mark topics as A or R to see them here</div></div>
+    <div class="sec">EoA Issues</div>
+    <div id="fb-eoa-list"><div class="empty-hint">No EoA issues captured</div></div>
+    <div class="sec">Additional Notes</div>
+    <textarea class="notes-input" id="fb-notes" placeholder="Additional feedback notes..." style="margin-top:4px;" oninput="saveFeedback()"></textarea>
+  </div>
+
+  <!-- TRAINING AGREEMENT TAB -->
+  <div class="tab-panel" id="tp-ta">
+    <div class="sec">Training Agreement Details</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;">Complete Part 3A ETCS/ATO PPS and Ground Rules. Select the agreement type on the Details tab. Export code includes all TA data for the mothership to generate the document.</p>
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1a4a8a;margin:10px 0 8px;padding:6px 10px;background:#e8eef7;border-radius:8px;">Part 2 — Ground Rules</div>
+    <div class="fg"><label>Emergency Brake Terminology</label>
+      <input type="text" id="ta-emergency" value="Emergency" oninput="saveTA()" style="font-size:16px;padding:13px;">
+    </div>
+    <div class="fg"><label>Full Service Brake Terminology</label>
+      <input type="text" id="ta-fullservice" value="Full Service" oninput="saveTA()" style="font-size:16px;padding:13px;">
+    </div>
+    <div class="fg"><label>Stop / Freeze Terminology</label>
+      <input type="text" id="ta-freeze" value="Stop" oninput="saveTA()" style="font-size:16px;padding:13px;">
+    </div>
+    <div class="fg"><label>Additional Ground Rules / Comments</label>
+      <textarea id="ta-additional" oninput="saveTA()" style="min-height:80px;"></textarea>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1a6b3a;margin:14px 0 8px;padding:6px 10px;background:#e6f4ec;border-radius:8px;">Part 3A — ETCS/ATO</div>
+    <div class="fg"><label>Stop Short / Release Doors — PPS Methods</label>
+      <textarea id="ta-pps-stop" oninput="saveTA()" style="min-height:100px;">On approach to stations check car length and stopping pattern. Use Snap to match the boards on the platform with the in-cab stickers.</textarea>
+    </div>
+    <div class="fg"><label>Wrong Side Door Release — PPS Methods</label>
+      <textarea id="ta-pps-door" oninput="saveTA()" style="min-height:100px;">Pause for doors and look at platform side before release.</textarea>
+    </div>
+    <div class="fg"><label>Any Additional Requirements / Comments</label>
+      <textarea id="ta-add-ma" oninput="saveTA()" style="min-height:80px;">Check and call out distance of MA before moving away from either an EoA, station, or accepting ATO.</textarea>
+    </div>
+    <div id="ta-saved-msg" class="ta-saved hidden" style="margin-top:8px;">&#10003; Training agreement saved</div>
+  </div>
+
+  <!-- EXPORT TAB -->
+  <div class="tab-panel" id="tp-export">
+    <div class="sec">Export Code</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Copy this code and paste it into the Mothership to generate your report.</p>
+    <div class="code-box" id="export-code-box">Tap Generate to create export code</div>
+    <button class="btn btn-blue" onclick="generateExport()">Generate Export Code</button>
+    <button class="btn btn-outline" onclick="copyExport()">Copy Code</button>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const STATIONS = [
+  {code:'BFR',name:'Blackfriars'},{code:'BFR Bay',name:'Blackfriars Bay Platform'},
+  {code:'CRI',name:'Cricklewood'},{code:'CTK',name:'City Thameslink'},
+  {code:'ECR',name:'East Croydon'},{code:'EPH',name:'Elephant & Castle'},
+  {code:'FPK',name:'Finsbury Park'},{code:'KTN',name:'Kentish Town'},
+  {code:'LBG',name:'London Bridge'},{code:'STP',name:'St Pancras International'},
+  {code:'WHP',name:'West Hampstead Thameslink'},{code:'ZFD',name:'Farringdon'},
+];
+
+const NCL_DEPOTS = ['Welwyn Garden City','Hornsey Fleet Link'];
+const ZERO_DEPOTS = ['Peterborough','Cambridge','Hitchin','Bedford','Luton','St Albans','Cricklewood','Brighton'];
+
+const TOPICS = {
+  groups: [
+    { id:'sys', label:'System Knowledge', topics:[
+      {id:'dmi_icons', name:'DMI Icons & Display Areas'},
+      {id:'planning_area', name:'Planning Area & Zoom'},
+      {id:'dmi_dim', name:'DMI Dim Button Bug'},
+      {id:'rbc', name:'RBC Connector'},
+      {id:'levels_modes', name:'Levels, Modes & Transitions'},
+    ]},
+    { id:'trans', label:'Transitions', topics:[
+      {id:'lvl2_enable', name:'Level 2 Enabling'},
+      {id:'trans_in', name:'Transition In'},
+      {id:'trans_out', name:'Transition Out'},
+      {id:'signal_rev', name:'Signal Reversion Risk'},
+      {id:'red_sig', name:'Red Signal on Transition Out'},
+      {id:'eph_risk', name:'EPH Unsighted Red Risk'},
+    ]},
+    { id:'driving', label:'Driving the Train', topics:[
+      {id:'overlay', name:'Overlay Risks & Distance to Target'},
+      {id:'wrong_route', name:'Wrong Route with ATO'},
+      {id:'eoa_dra', name:'EoA Handling & DRA'},
+      {id:'ato_drop', name:'ATO Dropouts'},
+      {id:'skip_stn', name:'Skip Station'},
+    ]},
+    { id:'pps', label:'PPS & Safety', topics:[
+      {id:'wrong_door', name:'Wrong Side Door Release'},
+      {id:'stop_short', name:'Stop Short & Release Doors PPS'},
+      {id:'rbt', name:'Running Brake Test'},
+    ]},
+    { id:'ooc', label:'Degraded & Out of Course', topics:[
+      {id:'posa', name:'PoSA & Virtual Block Markers'},
+      {id:'zfd_turn', name:'Turn Back at Farringdon'},
+      {id:'lra', name:'LRA Icon & Restrictions'},
+    ]},
+    { id:'ato', label:'ATO Operation', topics:[
+      {id:'ato_op', name:'ATO Operation & Hours'},
+      {id:'ato_dra', name:'DRA Usage with ATO'},
+      {id:'ato_borders', name:'ATO Border Awareness'},
+    ]},
+  ],
+  attr: [
+    {id:'punctual', name:'Punctuality & Timekeeping'},
+    {id:'communication', name:'Communication'},
+    {id:'attitude', name:'Attitude & Receptiveness'},
+    {id:'confidence', name:'Confidence & Decision Making'},
+    {id:'safety', name:'Safety Awareness'},
+  ]
+};
+
+// ========== STATE ==========
+let candidates = [];
+let curCandIdx = -1;
+let curDayIdx = -1;
+let editTrainIdx = null;
+let editEoaIdx = null;
+let tempEoas = [];
+let trainDir = ''; // 'nb' or 'sb'
+let trainTransitions = {};
+
+function curCand(){ return candidates[curCandIdx]||null; }
+function curDay(){ const c=curCand(); return c?c.days[curDayIdx]:null; }
+
+// ========== STORAGE ==========
+function save(){
+  try{
+    localStorage.setItem('etcs_v2', JSON.stringify(candidates));
+    flashSaved();
+  } catch(e){ console.warn('Save failed', e); }
+}
+function flashSaved(){
+  const el = document.getElementById('save-indicator');
+  if(!el) return;
+  el.style.opacity='1';
+  clearTimeout(flashSaved._t);
+  flashSaved._t = setTimeout(()=>{ el.style.opacity='0'; }, 1500);
+}
+function load(){
+  try{
+    const d = localStorage.getItem('etcs_v2');
+    if(d) candidates = JSON.parse(d);
+  } catch(e){ candidates=[]; }
+}
+
+// ========== TOAST ==========
+function toast(msg){
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 1800);
+}
+
+// ========== PAGE NAV ==========
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  window.scrollTo(0,0);
+  if(id==='home') renderHome();
+  if(id==='cand') renderDayList();
+}
+
+function leaveDayPage(){
+  cancelTrain();
+  showPage('cand');
+}
+
+// ========== HOME ==========
+function renderHome(){
+  const el = document.getElementById('cand-list');
+  if(!candidates.length){ el.innerHTML='<div class="empty-hint">No candidates yet. Tap + New to add one.</div>'; return; }
+  el.innerHTML = candidates.map((c,i)=>`
+    <div class="card" onclick="openCandidate(${i})">
+      <div class="card-title">${c.name}</div>
+      <div class="card-sub">${c.depot} &middot; ${c.days.length} day${c.days.length!==1?'s':''}</div>
+    </div>
+  `).join('');
+}
+
+function addCandidate(){
+  const name = document.getElementById('nc-name').value.trim();
+  const depot = document.getElementById('nc-depot').value;
+  const gender = document.getElementById('nc-gender').value;
+  if(!name){ toast('Enter a name'); return; }
+  if(!depot){ toast('Select a depot'); return; }
+  candidates.push({ name, depot, gender, days:[] });
+  save();
+  document.getElementById('nc-name').value='';
+  document.getElementById('nc-depot').value='';
+  showPage('home');
+  toast('Candidate added');
+}
+
+function openCandidate(idx){
+  curCandIdx = idx;
+  const c = curCand();
+  document.getElementById('cand-page-name').textContent = c.name;
+  document.getElementById('cand-page-depot').textContent = c.depot;
+  showPage('cand');
+}
+
+function renderDayList(){
+  const c = curCand(); if(!c) return;
+  const el = document.getElementById('day-list');
+  if(!c.days.length){ el.innerHTML='<div class="empty-hint">No days yet. Tap + Day to add one.</div>'; return; }
+  el.innerHTML = c.days.map((d,i)=>`
+    <div class="card" onclick="openDay(${i})">
+      <div class="card-title">Day ${d.day}${d.day==='3s'?' & Summative':''} &mdash; ${d.date||'No date'}</div>
+      <div class="card-sub">${(d.trains||[]).filter(Boolean).length} trains &middot; ${countGrades(d)} topics covered</div>
+    </div>
+  `).join('');
+}
+
+function countGrades(d){
+  if(!d.grades) return 0;
+  return Object.values(d.grades).filter(v=>v&&v!=='').length;
+}
+
+function addDay(){
+  const c = curCand(); if(!c) return;
+  const day = {
+    day:'1', date: new Date().toISOString().split('T')[0],
+    firstWithMe:'yes', prevAssessors:{},
+    metAt:'FPK', metHow:'station',
+    nclExp:'sa', diObserved:'no', prevDepot:'',
+    ta:'none', taDetails:null,
+    prevAdvice:'', feedback:'', ooc:'', advice:'',
+    trains:[], grades:{}, attrGrades:{},
+    feedbackSel:{ good:[], struggled:[], eoas:[], notes:'' }
+  };
+  c.days.push(day);
+  save();
+  openDay(c.days.length-1);
+}
+
+function deleteCandidate(){
+  if(!confirm('Delete this candidate and all their data?')) return;
+  candidates.splice(curCandIdx,1);
+  save();
+  showPage('home');
+}
+
+// ========== DAY ==========
+function openDay(idx){
+  curDayIdx = idx;
+  const d = curDay();
+  document.getElementById('day-page-title').textContent = curCand().name;
+  document.getElementById('day-page-sub').textContent = 'Day '+(d.day==='3s'?'3 & Summative':d.day)+' — '+(d.date||'No date');
+
+  // Load details tab
+  document.getElementById('d-date').value = d.date||'';
+  document.getElementById('d-day').value = d.day||'1';
+  document.getElementById('d-first-with-me').value = d.firstWithMe||'yes';
+  document.getElementById('d-met-at').value = d.metAt||'FPK';
+  document.getElementById('d-met-how').value = d.metHow||'station';
+  document.getElementById('d-prev-advice').value = d.prevAdvice||'';
+  document.getElementById('d-feedback').value = d.feedback||'';
+  document.getElementById('d-ooc').value = d.ooc||'';
+  document.getElementById('d-advice').value = d.advice||'';
+
+  // NCL / zero exp
+  const depot = curCand().depot;
+  const isNCL = NCL_DEPOTS.includes(depot);
+  const isZero = ZERO_DEPOTS.includes(depot);
+  document.getElementById('ncl-exp-wrap').classList.toggle('hidden', !isNCL);
+  document.getElementById('zero-exp-wrap').classList.toggle('hidden', !isZero);
+  if(isNCL) document.getElementById('d-ncl-exp').value = d.nclExp||'sa';
+  if(isZero) document.getElementById('d-di-observed').value = d.diObserved||'no';
+  document.getElementById('d-prev-depot').value = d.prevDepot||'';
+
+  // TA
+  loadTA();
+  updateDayFlags();
+
+  showPage('day');
+  showTab('details', document.querySelector('#day-tabs .tab'));
+  renderTrains();
+  renderTopics();
+  renderFeedback();
+}
+
+function saveDetail(key, val){
+  const d = curDay(); if(!d) return;
+  d[key] = val;
+  save();
+  document.getElementById('day-page-sub').textContent = 'Day '+(d.day==='3s'?'3 & Summative':d.day)+' — '+(d.date||'No date');
+}
+
+function updateDayFlags(){
+  const d = curDay(); if(!d) return;
+  const dayNum = d.day==='3s'?3:parseInt(d.day)||1;
+  const firstWithMe = d.firstWithMe||'yes';
+  const wrap = document.getElementById('prev-assessors-wrap');
+  if(firstWithMe==='yes' || dayNum===1){
+    wrap.innerHTML=''; return;
+  }
+  let html='';
+  for(let i=1;i<dayNum;i++){
+    const label = 'Day '+i+' assessed by';
+    const val = (d.prevAssessors&&d.prevAssessors[i])||'';
+    html+=`<div class="fg"><label>${label}</label><input type="text" class="form-input" value="${val}" placeholder="Assessor name..." oninput="savePrevAssessor(${i},this.value)"></div>`;
+  }
+  wrap.innerHTML=html;
+}
+
+function savePrevAssessor(dayNum, val){
+  const d = curDay(); if(!d) return;
+  if(!d.prevAssessors) d.prevAssessors={};
+  d.prevAssessors[dayNum]=val;
+  save();
+}
+
+// ========== TABS ==========
+function showTab(name, btn){
+  var trainTab = document.getElementById('tp-trains');
+  if(trainTab && trainTab.classList.contains('on') && name!=='trains'){
+    cancelTrain();
+  }
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('#day-tabs .tab').forEach(function(b){b.classList.remove('on');});
+  var panel = document.getElementById('tp-'+name);
+  if(panel) panel.classList.add('on');
+  if(btn) btn.classList.add('on');
+  if(name==='feedback') renderFeedback();
+  if(name==='ta') loadTATab();
+  window.scrollTo(0,0);
+}
+
+// ========== TRAINING AGREEMENT ==========
+function loadTA(){
+  var d = curDay(); if(!d) return;
+  var ta = d.ta||'none';
+  document.querySelectorAll('#ta-opts .ropt').forEach(function(r){
+    r.classList.toggle('on', r.dataset.val===ta);
+    r.querySelector('input').checked = r.dataset.val===ta;
+  });
+  // Show status indicator if TA saved
+  var statusEl = document.getElementById('ta-status');
+  if(statusEl) statusEl.style.display = (ta==='new' && d.taDetails) ? 'block' : 'none';
+}
+
+function loadTATab(){
+  var d = curDay(); if(!d) return;
+  if(d.taDetails){
+    var td=d.taDetails;
+    var stopEl=document.getElementById('ta-pps-stop');
+    var doorEl=document.getElementById('ta-pps-door');
+    var emgEl=document.getElementById('ta-emergency');
+    var fsEl=document.getElementById('ta-fullservice');
+    var frzEl=document.getElementById('ta-freeze');
+    var addEl=document.getElementById('ta-additional');
+    if(stopEl) stopEl.value=td.ppsStop||stopEl.value;
+    var addMaEl=document.getElementById('ta-add-ma');
+    if(addMaEl) addMaEl.value=td.addMA||addMaEl.value;
+    if(doorEl) doorEl.value=td.ppsDoor||doorEl.value;
+    if(emgEl) emgEl.value=td.emergency||'Emergency';
+    if(fsEl) fsEl.value=td.fullservice||'Full Service';
+    if(frzEl) frzEl.value=td.freeze||'Stop';
+    if(addEl) addEl.value=td.additional||'';
+  }
+}
+
+document.getElementById('ta-opts').addEventListener('click',function(e){
+  const ropt = e.target.closest('.ropt'); if(!ropt) return;
+  const val = ropt.dataset.val;
+  const d = curDay(); if(!d) return;
+  d.ta=val; save();
+  document.querySelectorAll('#ta-opts .ropt').forEach(r=>{
+    r.classList.toggle('on',r.dataset.val===val);
+    r.querySelector('input').checked=r.dataset.val===val;
+  });
+  document.getElementById('ta-form-wrap').classList.toggle('hidden',val!=='new');
+});
+
+function saveTA(){
+  var d = curDay(); if(!d) return;
+  d.taDetails = {
+    ppsStop: document.getElementById('ta-pps-stop').value,
+    ppsDoor: document.getElementById('ta-pps-door').value,
+    emergency: document.getElementById('ta-emergency').value,
+    fullservice: document.getElementById('ta-fullservice').value,
+    freeze: document.getElementById('ta-freeze').value,
+    additional: document.getElementById('ta-additional').value,
+    addMA: (document.getElementById('ta-add-ma')||{}).value||'',
+  };
+  save();
+  var msg = document.getElementById('ta-saved-msg');
+  if(msg){ msg.classList.remove('hidden'); setTimeout(function(){msg.classList.add('hidden');},2000); }
+  var statusEl = document.getElementById('ta-status');
+  if(statusEl && d.ta==='new') statusEl.style.display='block';
+}
+
+// ========== STATION SEARCH ==========
+function filterStn(inputId, dropId, val){
+  const drop = document.getElementById(dropId);
+  if(!val||val.length<1){ drop.classList.remove('open'); return; }
+  const q = val.toLowerCase();
+  const matches = STATIONS.filter(s=>s.code.toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
+  if(!matches.length){ drop.classList.remove('open'); return; }
+  drop.innerHTML = matches.map(s=>`<div class="stn-opt" data-input="${inputId}" data-drop="${dropId}" data-code="${s.code}" data-name="${s.name}"><span class="stn-code">${s.code}</span>${s.name}</div>`).join('');
+  drop.classList.add('open');
+}
+
+function filterStnEoa(val){
+  const drop = document.getElementById('drop-eoa');
+  if(!val||val.length<1){ drop.classList.remove('open'); return; }
+  const q = val.toLowerCase();
+  const matches = STATIONS.filter(s=>s.code.toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
+  if(!matches.length){ drop.classList.remove('open'); return; }
+  drop.innerHTML = matches.map(s=>`<div class="stn-opt" data-eoacode="${s.code}" data-eoaname="${s.name}"><span class="stn-code">${s.code}</span>${s.name}</div>`).join('');
+  drop.classList.add('open');
+}
+
+document.addEventListener('click',function(e){
+  // Station picker
+  const stnOpt = e.target.closest('[data-code]');
+  if(stnOpt && stnOpt.dataset.input){
+    const inp = document.getElementById(stnOpt.dataset.input);
+    if(inp) inp.value = stnOpt.dataset.code;
+    const drop = document.getElementById(stnOpt.dataset.drop);
+    if(drop) drop.classList.remove('open');
+    updateDirection();
+    return;
+  }
+  // EoA station picker
+  const eoaStn = e.target.closest('[data-eoacode]');
+  if(eoaStn){
+    const loc = document.getElementById('e-loc');
+    if(loc) loc.value = eoaStn.getAttribute('data-eoacode')+' \u2014 '+eoaStn.getAttribute('data-eoaname');
+    document.getElementById('drop-eoa').classList.remove('open');
+    document.getElementById('e-pos-wrap').classList.remove('hidden');
+    return;
+  }
+  // EoA type toggle
+  const etype = e.target.closest('[data-etype]');
+  if(etype){
+    document.querySelectorAll('#eoa-type-opts .yn-opt').forEach(o=>{
+      o.classList.toggle('on-y', o.dataset.etype===etype.dataset.etype);
+      o.classList.remove('on-n');
+    });
+    const isCleared = etype.dataset.etype==='cleared';
+    document.getElementById('e-dra-wrap').classList.toggle('hidden',isCleared);
+    document.getElementById('e-stopped-wrap').classList.toggle('hidden',isCleared);
+    const distLbl = document.getElementById('e-dist-lbl');
+    if(distLbl) distLbl.textContent = isCleared?'Distance when cleared':'Distance from EoA/Marker Board';
+    const appLbl = document.getElementById('e-approach-lbl');
+    if(appLbl) appLbl.textContent = isCleared?'Approach \u2014 under control?':'Approach \u2014 under control and ready to stop?';
+    return;
+  }
+  // EoA position
+  const epos = e.target.closest('[data-pos]');
+  if(epos){
+    document.querySelectorAll('#eoa-pos-opts .yn-opt').forEach(o=>o.classList.remove('on-y'));
+    epos.classList.add('on-y');
+    return;
+  }
+  // EoA DRA
+  const edra = e.target.closest('#eoa-dra-opts [data-dra]');
+  if(edra){
+    document.querySelectorAll('#eoa-dra-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+    const val = edra.dataset.dra;
+    edra.classList.add(val==='correct'?'on-y':val==='incorrect'?'on-n':'on-na');
+    document.getElementById('e-dra-notes-wrap').classList.toggle('hidden',val!=='incorrect');
+    return;
+  }
+  // EoA approach
+  const eapp = e.target.closest('#eoa-approach-opts [data-app]');
+  if(eapp){
+    document.querySelectorAll('#eoa-approach-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+    const val = eapp.dataset.app;
+    eapp.classList.add(val==='good'?'on-y':val==='poor'?'on-n':'on-na');
+    document.getElementById('e-approach-notes-wrap').classList.toggle('hidden',val!=='poor');
+    return;
+  }
+  // EoA stopped
+  const estopped = e.target.closest('#eoa-stopped-opts [data-stopped]');
+  if(estopped){
+    document.querySelectorAll('#eoa-stopped-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+    const val = estopped.dataset.stopped;
+    estopped.classList.add(val==='good'?'on-y':val==='poor'?'on-n':'on-na');
+    document.getElementById('e-stopped-notes-wrap').classList.toggle('hidden',val!=='poor');
+    return;
+  }
+  // General DRA
+  const gdra = e.target.closest('#t-dra-opts [data-dra]');
+  if(gdra){
+    document.querySelectorAll('#t-dra-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+    const val = gdra.dataset.dra;
+    gdra.classList.add(val==='correct'?'on-y':val==='incorrect'?'on-n':'on-na');
+    document.getElementById('t-dra-notes-wrap').classList.toggle('hidden',val!=='incorrect');
+    return;
+  }
+  // Transition yn-opts
+  const trYn = e.target.closest('[data-trkey] .yn-opt');
+  if(trYn){
+    const group = trYn.closest('[data-trkey]');
+    const key = group.dataset.trkey;
+    const val = trYn.dataset.val;
+    trainTransitions[key]=val;
+    group.querySelectorAll('.yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+    const posVals=['y','already','enabled','lvl2'];
+    const negVals=['n','no','ntc'];
+    trYn.classList.add(posVals.includes(val)?'on-y':negVals.includes(val)?'on-n':'on-na');
+    buildTransitions();
+    return;
+  }
+  // Chk issues
+  const issue = e.target.closest('[data-issue]');
+  if(issue){
+    const val = issue.dataset.issue;
+    if(!trainTransitions.handoverIssues) trainTransitions.handoverIssues=[];
+    const idx = trainTransitions.handoverIssues.indexOf(val);
+    if(idx===-1){ trainTransitions.handoverIssues.push(val); issue.classList.add('on'); }
+    else{ trainTransitions.handoverIssues.splice(idx,1); issue.classList.remove('on'); }
+    return;
+  }
+  // Close dropdowns
+  if(!e.target.closest('.stn-wrap')){
+    document.querySelectorAll('.stn-drop').forEach(d=>d.classList.remove('open'));
+  }
+});
+
+// ========== TRAINS ==========
+function getMaxTrains(){
+  const d = curDay(); if(!d) return 6;
+  return d.day==='3s'?4:6;
+}
+
+function renderTrains(){
+  const d = curDay(); if(!d) return;
+  const trains = d.trains||[];
+  const max = getMaxTrains();
+  let html='';
+  for(let i=0;i<max;i++){
+    const t = trains[i];
+    if(t){
+      html+=`<div class="train-card">
+        <div class="train-card-hdr">
+          <div>
+            <div class="train-card-hc">${t.hc||'?'} <span style="font-weight:400;font-size:13px;color:var(--text2);">${t.time||''}</span></div>
+            <div class="train-card-sub">${t.from||'?'} \u2192 ${t.to||'?'} &middot; ${t.unit||''} &middot; ${t.mode||'ATO'}</div>
+          </div>
+          <div class="train-edit-btn" onclick="openTrainForm(${i})">Edit</div>
+        </div>
+      </div>`;
+    } else {
+      const isNext = i===trains.length;
+      html+=`<div class="train-slot${isNext?' active':''}" onclick="openTrainForm(${i})">
+        <div class="train-slot-num">Train ${i+1}</div>
+        <div class="train-slot-hint">${isNext?'Tap to add':'Empty'}</div>
+      </div>`;
+    }
+  }
+  document.getElementById('train-list').innerHTML=html;
+}
+
+function openTrainForm(idx){
+  const d = curDay(); if(!d) return;
+  editTrainIdx = idx;
+  tempEoas = [];
+  trainTransitions = {};
+  trainDir = '';
+
+  const form = document.getElementById('train-form');
+  form.style.display='block';
+  document.getElementById('train-form-title').textContent = 'Train '+(idx+1);
+
+  const t = (d.trains||[])[idx];
+  if(t){
+    setVal('t-hc',t.hc||'');
+    setVal('t-time',t.time||'');
+    setVal('t-from',t.from||'');
+    setVal('t-to',t.to||'');
+    setVal('t-unit',t.unit||'700');
+    setVal('t-mode',t.mode||'ATO');
+    setVal('t-notes',t.notes||'');
+    const shrtMA = document.getElementById('t-short-ma');
+    if(shrtMA){ shrtMA.checked=!!t.shortMA; toggleShortMA(!!t.shortMA); }
+    setVal('t-short-ma-notes',t.shortMANotes||'');
+    tempEoas = JSON.parse(JSON.stringify(t.eoas||[]));
+    trainTransitions = JSON.parse(JSON.stringify(t.transitions||{}));
+    trainDir = t.dir||'';
+    // Set general DRA
+    setDraGroup('t-dra-opts', t.dra||'na');
+    const dNotes = document.getElementById('t-dra-notes-wrap');
+    if(dNotes) dNotes.classList.toggle('hidden', t.dra!=='incorrect');
+    setVal('t-dra-notes', t.draNotes||'');
+  } else {
+    setVal('t-hc','9');setVal('t-time','');setVal('t-from','');setVal('t-to','');
+    setVal('t-unit','700');setVal('t-mode','ATO');setVal('t-notes','');
+    setVal('t-short-ma-notes','');
+    const shrtMA = document.getElementById('t-short-ma');
+    if(shrtMA){ shrtMA.checked=false; toggleShortMA(false); }
+    setDraGroup('t-dra-opts','na');
+    const dNotes = document.getElementById('t-dra-notes-wrap');
+    if(dNotes) dNotes.classList.add('hidden');
+  }
+
+  renderEoaList();
+  buildTransitions();
+  updateDirection();
+  cancelEoa();
+
+  // Insert form after the slot/card
+  const list = document.getElementById('train-list');
+  const items = list.children;
+  if(items[idx]){
+    list.insertBefore(form, items[idx].nextSibling||null);
+  } else {
+    list.appendChild(form);
+  }
+  setTimeout(()=>{ const r=form.getBoundingClientRect(); window.scrollBy({top: r.top - 80, behavior:'smooth'}); },80);
+}
+
+function cancelTrain(){
+  editTrainIdx=null; tempEoas=[]; trainTransitions={}; trainDir='';
+  const form = document.getElementById('train-form');
+  form.style.display='none';
+  const tp = document.getElementById('tp-trains');
+  if(tp) tp.appendChild(form);
+  renderTrains();
+}
+
+function saveTrain(){
+  const d = curDay(); if(!d) return;
+  if(!d.trains) d.trains=[];
+  while(d.trains.length<=editTrainIdx) d.trains.push(null);
+  const mode = getVal('t-mode');
+  const trainData = {
+    hc: getVal('t-hc').toUpperCase(),
+    time: getVal('t-time'),
+    from: getVal('t-from'),
+    to: getVal('t-to'),
+    unit: getVal('t-unit'),
+    mode, dir: trainDir,
+    shortMA: document.getElementById('t-short-ma')?.checked||false,
+    shortMANotes: getVal('t-short-ma-notes'),
+    eoas: JSON.parse(JSON.stringify(tempEoas)),
+    transitions: JSON.parse(JSON.stringify(trainTransitions)),
+    dra: getDraVal('t-dra-opts'),
+    draNotes: getVal('t-dra-notes'),
+    notes: getVal('t-notes'),
+  };
+  d.trains[editTrainIdx]=trainData;
+  save();
+  cancelTrain();
+  toast('Train saved');
+}
+
+function setVal(id,v){ const el=document.getElementById(id); if(el) el.value=v; }
+function getVal(id){ const el=document.getElementById(id); return el?el.value:''; }
+
+function getDraVal(groupId){
+  const active = document.querySelector('#'+groupId+' .yn-opt.on-y, #'+groupId+' .yn-opt.on-n, #'+groupId+' .yn-opt.on-na');
+  if(!active) return 'na';
+  if(active.classList.contains('on-y')) return 'correct';
+  if(active.classList.contains('on-n')) return 'incorrect';
+  return 'na';
+}
+
+function setDraGroup(groupId, val){
+  document.querySelectorAll('#'+groupId+' .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+  const target = document.querySelector('#'+groupId+' [data-dra="'+val+'"]');
+  if(target) target.classList.add(val==='correct'?'on-y':val==='incorrect'?'on-n':'on-na');
+}
+
+function autoFormatTime(el){
+  let v = el.value.replace(/\D/g,'');
+  if(v.length>=4) v=v.slice(0,2)+':'+v.slice(2,4);
+  el.value=v;
+}
+
+function toggleShortMA(checked){
+  const wrap = document.getElementById('short-ma-notes-wrap');
+  if(wrap) wrap.classList.toggle('hidden',!checked);
+}
+
+// ========== DIRECTION ==========
+// Route order from North to South: FPK > WHP > STP > ZFD > CTK > BFR > LBG > EPH > ECR
+// NB = travelling northward (towards FPK), SB = travelling southward (towards ECR)
+const ROUTE_ORDER = ['FPK','KTN','WHP','STP','ZFD','CTK','BFR','LBG','EPH','ECR','CRI'];
+
+function detectDirection(from,to){
+  const fi = ROUTE_ORDER.indexOf(from);
+  const ti = ROUTE_ORDER.indexOf(to);
+  if(fi!==-1&&ti!==-1){
+    return ti<fi?'nb':'sb'; // going to lower index = going north
+  }
+  return 'nb'; // default
+}
+
+function updateDirection(){
+  const from = getVal('t-from');
+  const to = getVal('t-to');
+  if(from&&to&&!trainDir){
+    trainDir = detectDirection(from,to)||'nb';
+  }
+  renderDirBadge();
+  buildTransitions();
+}
+
+function renderDirBadge(){
+  const row = document.getElementById('direction-row');
+  const wrap = document.getElementById('dir-badge-wrap');
+  if(!wrap) return;
+  const from=getVal('t-from'), to=getVal('t-to');
+  if(!from||!to){ row.style.display='none'; return; }
+  row.style.display='block';
+  wrap.innerHTML=`<div class="dir-badge ${trainDir==='nb'?'dir-nb':'dir-sb'}" onclick="toggleDir()">
+    ${trainDir==='nb'?'Northbound &#8593;':'Southbound &#8595;'}
+    <span style="font-size:11px;opacity:.7;">Tap to flip</span>
+  </div>`;
+}
+
+function toggleDir(){
+  trainDir = trainDir==='nb'?'sb':'nb';
+  renderDirBadge();
+  buildTransitions();
+}
+
+// ========== TRANSITIONS ==========
+function ynRow(key,label,tr){
+  const v=tr[key]||'';
+  return '<div class="trans-row"><span class="trans-lbl">'+label+'</span>'+
+    '<div class="yn-opts" data-trkey="'+key+'">'+
+    '<div class="yn-opt '+(v==='y'?'on-y':'')+'" data-val="y">Yes</div>'+
+    '<div class="yn-opt '+(v==='n'?'on-n':'')+'" data-val="n">No</div>'+
+    '<div class="yn-opt '+(v==='na'?'on-na':'')+'" data-val="na">N/A</div>'+
+    '</div></div>';
+}
+
+function notesRow(key,label,tr){
+  return '<div class="trans-row"><span class="trans-lbl">'+label+'</span>'+
+    '<input type="text" class="notes-input" value="'+(tr[key]||'')+'" placeholder="Notes..." data-trkey="'+key+'" oninput="trainTransitions[this.dataset.trkey]=this.value"></div>';
+}
+
+function buildTransitions(){
+  const wrap = document.getElementById('transitions-wrap');
+  if(!wrap) return;
+  const from=getVal('t-from'), to=getVal('t-to');
+  const mode=getVal('t-mode');
+  const tr=trainTransitions;
+  if(!from||!to){ wrap.innerHTML=''; return; }
+
+  let html='';
+  const nb = trainDir==='nb'; // Northbound = towards FPK
+  const sb = trainDir==='sb'; // Southbound = towards ECR
+
+  // === TRANSITION IN ===
+  // NB train: comes from south (ECR/EPH/LBG direction) entering ETCS area at LBG or EPH
+  // SB train: comes from north (FPK/WHP/KTN) entering ETCS area at STP
+  // Special: from LBG = takeover mid-route
+
+  const fromNorth = ['FPK','KTN','WHP'].includes(from); // starting north of ETCS area
+  const fromSouth = ['ECR','EPH'].includes(from);        // starting south of ETCS area (transition in between EPH and BFR)
+  const fromLBG = from==='LBG';                          // takeover at LBG
+
+  // SB train starting from north = transition in at STP
+  const transInSB = sb && fromNorth;
+  // NB train starting from south = transition in at LBG/EPH area
+  const transInNB = nb && fromSouth;
+
+  if(transInSB){
+    html+='<div class="trans-block"><div class="trans-block-title">Transition In — Southbound at St Pancras</div>';
+    html+=lvl2CheckRow('St Pancras',tr);
+    if(mode!=='Manual') html+=atoEngageRow(tr);
+    html+='</div>';
+  } else if(transInNB){
+    html+='<div class="trans-block"><div class="trans-block-title">Transition In — Northbound at London Bridge</div>';
+    html+=lvl2CheckRow('London Bridge',tr);
+    if(mode!=='Manual') html+=atoEngageRow(tr);
+    html+='</div>';
+  } else if(fromLBG){
+    // Takeover at LBG - special case
+    html+='<div class="trans-block"><div class="trans-block-title">Takeover at London Bridge</div>';
+    const tv=tr.takeoverState||'';
+    html+='<div class="trans-row"><span class="trans-lbl">Train state on takeover at LBG</span>'+
+      '<div class="yn-opts" data-trkey="takeoverState">'+
+      '<div class="yn-opt '+(tv==='ntc'?'on-n':'')+'" data-val="ntc">NTC</div>'+
+      '<div class="yn-opt '+(tv==='lvl2'?'on-y':'')+'" data-val="lvl2">Level 2</div>'+
+      '</div></div>';
+    if(tv==='ntc'){
+      html+='<div class="info-box">NTC on takeover — will transition up the BFR spur. Enable Level 2 at WHP.</div>';
+      html+=lvl2CheckRow('WHP',tr);
+    } else if(tv==='lvl2'){
+      html+='<div class="info-box">Already Level 2 — running brake test required before ATO assessment.</div>';
+      html+=ynRow('rbtDone','Running brake test completed?',tr);
+    }
+    html+='</div>';
+  }
+
+  // === TRANSITION OUT ===
+  // SB train: exits ETCS area towards EPH/ECR or terminates in core
+  // NB train: exits ETCS area towards FPK/WHP/KTN or terminates in core
+
+  const toNorth = ['FPK','KTN'].includes(to);  // NB train exiting north via Canal Tunnel
+  const toWHP   = to==='WHP'||to==='CRI';       // NB train exiting via Dock Junction
+  const toSouth = to==='EPH'||to==='ECR';       // SB train exiting south
+  const toBFRBay = to==='BFR Bay';
+  const toCore  = ['STP','ZFD','CTK','BFR'].includes(to); // handover within core
+  const toLBG   = to==='LBG';                   // handover at LBG
+
+  if(toBFRBay){
+    html+='<div class="trans-block"><div class="trans-block-title">BFR Bay — Cab Shutdown</div>';
+    html+='<div class="info-box">BFR Bay is a terminus. No handover or inhibit required.</div>';
+    html+=ynRow('cabShutdown','Correct cab shutdown carried out?',tr);
+    if(tr.cabShutdown==='n') html+=notesRow('cabShutdownNotes','Notes on cab shutdown',tr);
+    html+='</div>';
+  } else if(toCore){
+    html+='<div class="trans-block"><div class="trans-block-title">Handover in Core</div>';
+    html+=handoverRows(tr, true);
+    html+='</div>';
+  } else if(toLBG){
+    html+='<div class="trans-block"><div class="trans-block-title">Handover at London Bridge</div>';
+    html+=handoverRows(tr, true);
+    html+='</div>';
+  } else if(toNorth){
+    // NB exiting via Canal Tunnel towards FPK
+    html+='<div class="trans-block"><div class="trans-block-title">Transition Out — Route C (Canal Tunnel)</div>';
+    if(mode!=='Manual') html+=atoHandbackRow(tr);
+    html+=ynRow('redSigCapture','Red signal captured on transition out?',tr);
+    if(tr.redSigCapture==='y') html+=notesRow('redSigNotes','Signal number and notes',tr);
+    html+=handoverRows(tr, false);
+    html+='</div>';
+  } else if(toWHP){
+    // NB exiting via Dock Junction towards WHP/CRI
+    html+='<div class="trans-block"><div class="trans-block-title">Transition Out — Route D (Dock Junction)</div>';
+    if(mode!=='Manual') html+=atoHandbackRow(tr);
+    html+=handoverRows(tr, false);
+    html+='</div>';
+  } else if(toSouth){
+    // SB exiting south towards EPH/ECR
+    html+='<div class="trans-block"><div class="trans-block-title">Transition Out — Southbound towards '+to+'</div>';
+    if(mode!=='Manual') html+=atoHandbackRow(tr);
+    if(to==='EPH'){
+      html+='<div class="info-box">Warning: poorly sighted signal between BFR and Elephant & Castle. Be prepared for a Red on transition out.</div>';
+    }
+    html+=handoverRows(tr, false);
+    html+='</div>';
+  }
+
+  wrap.innerHTML=html;
+}
+
+function lvl2CheckRow(station,tr){
+  const v=tr.lvl2Check||'';
+  let html='<div class="trans-row"><span class="trans-lbl">Did they check Level 2 was enabled at '+station+'?</span>'+
+    '<div class="yn-opts" data-trkey="lvl2Check">'+
+    '<div class="yn-opt '+(v==='already'?'on-y':'')+'" data-val="already">Yes \u2014 already on</div>'+
+    '<div class="yn-opt '+(v==='enabled'?'on-y':'')+'" data-val="enabled">Yes \u2014 was off, enabled it</div>'+
+    '<div class="yn-opt '+(v==='no'?'on-n':'')+'" data-val="no">No</div>'+
+    '</div></div>';
+  if(v==='enabled') html+='<div class="info-box">Level 2 was inhibited \u2014 correctly identified and enabled.</div>';
+  if(v==='no'){
+    const w=tr.lvl2WasOn||'';
+    html+='<div class="trans-row"><span class="trans-lbl">Was it enabled anyway?</span>'+
+      '<div class="yn-opts" data-trkey="lvl2WasOn">'+
+      '<div class="yn-opt '+(w==='y'?'on-y':'')+'" data-val="y">Yes</div>'+
+      '<div class="yn-opt '+(w==='n'?'on-n':'')+'" data-val="n">No</div>'+
+      '</div></div>';
+    if(w==='n') html+=notesRow('lvl2Notes','Notes \u2014 needed prompting',tr);
+  }
+  return html;
+}
+
+function atoEngageRow(tr){
+  return ynRow('atoEngaged','ATO engaged correctly?',tr)+
+    (tr.atoEngaged==='n'?notesRow('atoEngagedNotes','Notes',tr):'');
+}
+
+function atoHandbackRow(tr){
+  const v=tr.atoBreaking||'';
+  let html='<div class="trans-row"><span class="trans-lbl">Was ATO braking at the ATO border?</span>'+
+    '<div class="yn-opts" data-trkey="atoBreaking">'+
+    '<div class="yn-opt '+(v==='n'?'on-y':'')+'" data-val="n">No \u2014 clean handback</div>'+
+    '<div class="yn-opt '+(v==='y'?'on-n':'')+'" data-val="y">Yes \u2014 was braking</div>'+
+    '</div></div>';
+  if(v==='y'){
+    html+=ynRow('tookOverBraking','Did they take over during braking curve?',tr);
+    if(tr.tookOverBraking==='y') html+=notesRow('brakingNotes','Notes \u2014 should not take over during braking',tr);
+  }
+  return html;
+}
+
+function handoverRows(tr, inLevel2){
+  const NTC_ISSUES=['DRA not set','Brief not given','Signal not checked'];
+  const L2_ISSUES=['MA not confirmed','DRA not set','Brief not given','Signal not checked'];
+  const cv=tr.confirmRelieving||'';
+  let html='<div class="trans-row"><span class="trans-lbl">Confirm relieving driver Level 2 trained?</span>'+
+    '<div class="yn-opts" data-trkey="confirmRelieving">'+
+    '<div class="yn-opt '+(cv==='lvl2'?'on-y':'')+'" data-val="lvl2">Yes \u2014 Level 2</div>'+
+    '<div class="yn-opt '+(cv==='ntc'?'on-n':'')+'" data-val="ntc">Yes \u2014 NTC</div>'+
+    '<div class="yn-opt '+(cv==='no'?'on-na':'')+'" data-val="no">Didn\u2019t confirm</div>'+
+    '</div></div>';
+  if(cv==='no') html+=notesRow('confirmNotes','Notes \u2014 needed prompting',tr);
+
+  function issueChks(issues){
+    return '<div class="trans-row"><span class="trans-lbl">What went wrong?</span><div class="chk-issues">'+
+      issues.map(iss=>'<div class="chk-issue '+((tr.handoverIssues||[]).includes(iss)?'on':'')+'" data-issue="'+iss+'">'+iss+'</div>').join('')+
+      '</div></div>';
+  }
+
+  if(cv==='lvl2'){
+    html+=ynRow('handoverCorrect','Handover carried out correctly?',tr);
+    if(tr.handoverCorrect==='n'){ html+=issueChks(inLevel2?L2_ISSUES:NTC_ISSUES); html+=notesRow('handoverNotes','Notes',tr); }
+  } else if(cv==='ntc'||cv==='no'){
+    if(inLevel2){
+      html+=ynRow('inhibitCorrect','Level 2 inhibited and NTC selected correctly?',tr);
+      if(tr.inhibitCorrect==='n') html+=notesRow('inhibitNotes','Notes \u2014 needed prompting',tr);
+      html+=ynRow('signalMoreRestrictive','Did signal become more restrictive?',tr);
+      if(tr.signalMoreRestrictive==='y') html+=notesRow('signalNotes','Signal state and notes',tr);
+    } else {
+      html+=ynRow('lvl2Inhibited','Level 2 confirmed inhibited?',tr);
+      if(tr.lvl2Inhibited==='n') html+=notesRow('lvl2InhibitedNotes','Notes \u2014 needed prompting',tr);
+    }
+    html+=ynRow('handoverCorrect','Handover carried out correctly?',tr);
+    if(tr.handoverCorrect==='n'){ html+=issueChks(NTC_ISSUES); html+=notesRow('handoverNotes','Notes',tr); }
+  }
+  return html;
+}
+
+// ========== EOA ==========
+function showEoaForm(idx){
+  editEoaIdx = idx!==undefined?idx:null;
+  const form = document.getElementById('eoa-form');
+  form.style.display='block';
+  document.getElementById('eoa-form-title').textContent = editEoaIdx!==null?'Edit EoA Event':'New EoA Event';
+
+  // Reset form
+  setVal('e-ref',''); setVal('e-loc',''); setVal('e-distance','');
+  setVal('e-dra-notes',''); setVal('e-approach-notes',''); setVal('e-stopped-notes','');
+  document.getElementById('drop-eoa').classList.remove('open');
+  document.getElementById('e-pos-wrap').classList.add('hidden');
+  document.getElementById('e-dra-wrap').classList.remove('hidden');
+  document.getElementById('e-stopped-wrap').classList.remove('hidden');
+  document.getElementById('e-dra-notes-wrap').classList.add('hidden');
+  document.getElementById('e-approach-notes-wrap').classList.add('hidden');
+  document.getElementById('e-stopped-notes-wrap').classList.add('hidden');
+  document.querySelectorAll('#eoa-type-opts .yn-opt').forEach((o,i)=>{ o.classList.remove('on-y','on-n'); if(i===0)o.classList.add('on-y'); });
+  document.querySelectorAll('#eoa-pos-opts .yn-opt').forEach((o,i)=>{ o.classList.remove('on-y'); if(i===3)o.classList.add('on-y'); });
+  document.querySelectorAll('#eoa-dra-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+  document.querySelector('#eoa-dra-opts [data-dra="na"]').classList.add('on-na');
+  document.querySelectorAll('#eoa-approach-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+  document.querySelector('#eoa-approach-opts [data-app="na"]').classList.add('on-na');
+  document.querySelectorAll('#eoa-stopped-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na'));
+  document.querySelector('#eoa-stopped-opts [data-stopped="na"]').classList.add('on-na');
+
+  // Mode
+  const trainMode = getVal('t-mode');
+  const modeWrap = document.getElementById('e-mode-wrap');
+  if(trainMode==='ATO'){ setVal('e-mode','ATO'); modeWrap.classList.add('hidden'); }
+  else if(trainMode==='Manual'){ setVal('e-mode','Manual'); modeWrap.classList.add('hidden'); }
+  else{ modeWrap.classList.remove('hidden'); }
+
+  if(editEoaIdx!==null && tempEoas[editEoaIdx]){
+    const e=tempEoas[editEoaIdx];
+    setVal('e-ref',e.ref||'');
+    setVal('e-loc',e.loc||'');
+    setVal('e-distance',e.distance||'');
+    setVal('e-dra-notes',e.draNotes||'');
+    setVal('e-approach-notes',e.approachNotes||'');
+    setVal('e-stopped-notes',e.stoppedNotes||'');
+    if(e.hasStation) document.getElementById('e-pos-wrap').classList.remove('hidden');
+    // Restore type
+    document.querySelectorAll('#eoa-type-opts .yn-opt').forEach(o=>{ o.classList.remove('on-y','on-n'); if(o.dataset.etype===(e.type||'stopped')) o.classList.add('on-y'); });
+    if(e.type==='cleared'){
+      document.getElementById('e-dra-wrap').classList.add('hidden');
+      document.getElementById('e-stopped-wrap').classList.add('hidden');
+    }
+    // Restore pos
+    document.querySelectorAll('#eoa-pos-opts .yn-opt').forEach(o=>{ o.classList.remove('on-y'); if(o.dataset.pos===e.pos) o.classList.add('on-y'); });
+    // Restore DRA
+    const draEl = document.querySelector('#eoa-dra-opts [data-dra="'+(e.dra||'na')+'"]');
+    if(draEl){ document.querySelectorAll('#eoa-dra-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na')); draEl.classList.add(e.dra==='correct'?'on-y':e.dra==='incorrect'?'on-n':'on-na'); }
+    if(e.dra==='incorrect') document.getElementById('e-dra-notes-wrap').classList.remove('hidden');
+    // Restore approach
+    const appEl = document.querySelector('#eoa-approach-opts [data-app="'+(e.approach||'na')+'"]');
+    if(appEl){ document.querySelectorAll('#eoa-approach-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na')); appEl.classList.add(e.approach==='good'?'on-y':e.approach==='poor'?'on-n':'on-na'); }
+    if(e.approach==='poor') document.getElementById('e-approach-notes-wrap').classList.remove('hidden');
+    // Restore stopped
+    const stEl = document.querySelector('#eoa-stopped-opts [data-stopped="'+(e.stoppedOk||'na')+'"]');
+    if(stEl){ document.querySelectorAll('#eoa-stopped-opts .yn-opt').forEach(o=>o.classList.remove('on-y','on-n','on-na')); stEl.classList.add(e.stoppedOk==='good'?'on-y':e.stoppedOk==='poor'?'on-n':'on-na'); }
+    if(e.stoppedOk==='poor') document.getElementById('e-stopped-notes-wrap').classList.remove('hidden');
+  }
+
+  setTimeout(()=>form.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+function cancelEoa(){
+  const form = document.getElementById('eoa-form');
+  if(form) form.style.display='none';
+  editEoaIdx=null;
+}
+
+function saveEoa(){
+  const ref = getVal('e-ref').toUpperCase();
+  if(!ref){ toast('Enter EoA reference'); return; }
+  const type = document.querySelector('#eoa-type-opts .yn-opt.on-y')?.dataset.etype||'stopped';
+  const pos = document.querySelector('#eoa-pos-opts .yn-opt.on-y')?.dataset.pos||'end';
+  const dra = document.querySelector('#eoa-dra-opts .yn-opt.on-y, #eoa-dra-opts .yn-opt.on-n, #eoa-dra-opts .yn-opt.on-na')?.dataset.dra||'na';
+  const approach = document.querySelector('#eoa-approach-opts .yn-opt.on-y, #eoa-approach-opts .yn-opt.on-n, #eoa-approach-opts .yn-opt.on-na')?.dataset.app||'na';
+  const stoppedOk = document.querySelector('#eoa-stopped-opts .yn-opt.on-y, #eoa-stopped-opts .yn-opt.on-n, #eoa-stopped-opts .yn-opt.on-na')?.dataset.stopped||'na';
+  const locVal = getVal('e-loc');
+  const hasStation = !document.getElementById('e-pos-wrap').classList.contains('hidden');
+
+  const eoa = {
+    ref, type, mode: getVal('e-mode'),
+    loc: locVal, hasStation, pos: hasStation?pos:null,
+    distance: getVal('e-distance'),
+    dra: type==='cleared'?'na':dra,
+    draNotes: dra==='incorrect'?getVal('e-dra-notes'):'',
+    approach, approachNotes: approach==='poor'?getVal('e-approach-notes'):'',
+    stoppedOk: type==='cleared'?'na':stoppedOk,
+    stoppedNotes: stoppedOk==='poor'?getVal('e-stopped-notes'):'',
+  };
+
+  if(editEoaIdx!==null) tempEoas[editEoaIdx]=eoa;
+  else tempEoas.push(eoa);
+
+  renderEoaList();
+  cancelEoa();
+  toast('EoA saved');
+}
+
+function renderEoaList(){
+  const el = document.getElementById('eoa-list');
+  if(!el) return;
+  if(!tempEoas.length){ el.innerHTML=''; return; }
+  el.innerHTML = tempEoas.map((e,i)=>`
+    <div class="eoa-item">
+      <div class="eoa-item-hdr">
+        <span class="eoa-ref">${e.ref}</span>
+        <div style="display:flex;gap:8px;">
+          <span style="font-size:12px;color:var(--accent);cursor:pointer;" onclick="showEoaForm(${i})">Edit</span>
+          <span class="eoa-del" onclick="removeEoa(${i})">&#215;</span>
+        </div>
+      </div>
+      <div class="eoa-detail">${[e.type,e.mode,e.loc,e.distance,e.dra!=='na'?'DRA '+e.dra:''].filter(Boolean).join(' · ')}</div>
+    </div>
+  `).join('');
+}
+
+function removeEoa(i){ tempEoas.splice(i,1); renderEoaList(); }
+
+// ========== TOPICS ==========
+function renderTopics(){
+  const d = curDay(); if(!d) return;
+  if(!d.grades) d.grades={};
+  if(!d.attrGrades) d.attrGrades={};
+
+  let html='';
+  TOPICS.groups.forEach(grp=>{
+    html+=`<div class="topic-group-label">${grp.label}</div>`;
+    grp.topics.forEach(t=>{
+      const key=grp.id+'_'+t.id;
+      const grade=d.grades[key]||'';
+      html+=`<div class="topic-item ${grade}" onclick="cycleTopic('grades','${key}',this)">
+        <div class="topic-badge">${grade||''}</div>
+        <div class="topic-name">${t.name}</div>
+      </div>`;
+    });
+  });
+
+  document.getElementById('topics-wrap').innerHTML=html;
+
+  let attrHtml='';
+  TOPICS.attr.forEach(t=>{
+    const key=t.id;
+    const grade=d.attrGrades[key]||'';
+    attrHtml+=`<div class="topic-item ${grade}" onclick="cycleTopic('attrGrades','${key}',this)">
+      <div class="topic-badge">${grade||''}</div>
+      <div class="topic-name">${t.name}</div>
+    </div>`;
+  });
+  document.getElementById('attr-wrap').innerHTML=attrHtml;
+}
+
+function cycleTopic(storeKey, key, el){
+  const d=curDay(); if(!d) return;
+  if(!d[storeKey]) d[storeKey]={};
+  const cur=d[storeKey][key]||'';
+  const next=cur===''?'C':cur==='C'?'A':cur==='A'?'R':'';
+  d[storeKey][key]=next;
+  el.className='topic-item '+(next||'');
+  el.querySelector('.topic-badge').textContent=next||'';
+  save();
+}
+
+// ========== FEEDBACK ==========
+function renderFeedback(){
+  const d=curDay(); if(!d) return;
+  if(!d.feedbackSel) d.feedbackSel={good:[],struggled:[],eoas:[],notes:''};
+  const fb=d.feedbackSel;
+
+  let goodHtml='',hasGood=false;
+  TOPICS.groups.forEach(grp=>{
+    grp.topics.forEach(t=>{
+      const key=grp.id+'_'+t.id;
+      const grade=(d.grades||{})[key]||'';
+      if(grade){
+        hasGood=true;
+        const on=(fb.good||[]).includes(key);
+        goodHtml+=`<div class="fb-item${on?' on':''}" data-fbsec="good" data-fbkey="${key}">
+          <div class="fb-tick">${on?'&#10003;':''}</div>
+          <div class="fb-name">${t.name} <span style="font-size:11px;font-weight:700;color:${grade==='C'?'var(--green)':grade==='A'?'var(--amber)':'var(--danger)'};">${grade}</span></div>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('fb-good-list').innerHTML=hasGood?goodHtml:'<div class="empty-hint">Tick topics in Topics tab first</div>';
+
+  let strugHtml='',hasStrug=false;
+  TOPICS.groups.forEach(grp=>{
+    grp.topics.forEach(t=>{
+      const key=grp.id+'_'+t.id;
+      const grade=(d.grades||{})[key]||'';
+      if(grade==='A'||grade==='R'){
+        hasStrug=true;
+        const on=(fb.struggled||[]).includes(key);
+        strugHtml+=`<div class="fb-item${on?' on':''}" data-fbsec="struggled" data-fbkey="${key}">
+          <div class="fb-tick">${on?'&#10003;':''}</div>
+          <div class="fb-name">${t.name}</div>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('fb-struggled-list').innerHTML=hasStrug?strugHtml:'<div class="empty-hint">No A or R topics yet</div>';
+
+  let eoaHtml='',hasEoa=false;
+  (d.trains||[]).forEach((t,ti)=>{
+    if(!t) return;
+    (t.eoas||[]).forEach((e,ei)=>{
+      if(e.dra==='incorrect'||e.stoppedOk==='poor'||e.approach==='poor'){
+        hasEoa=true;
+        const id='eoa-'+ti+'-'+ei;
+        const on=(fb.eoas||[]).includes(id);
+        eoaHtml+=`<div class="fb-item${on?' on':''}" data-fbsec="eoas" data-fbkey="${id}">
+          <div class="fb-tick">${on?'&#10003;':''}</div>
+          <div class="fb-name">${e.ref}${e.loc?' — '+e.loc:''} · ${[e.dra==='incorrect'?'DRA issue':'',e.approach==='poor'?'Approach':'',e.stoppedOk==='poor'?'Stop':''].filter(Boolean).join(', ')}</div>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('fb-eoa-list').innerHTML=hasEoa?eoaHtml:'<div class="empty-hint">No EoA issues captured</div>';
+  document.getElementById('fb-notes').value=fb.notes||'';
+}
+
+document.addEventListener('click',function(e){
+  const fbItem=e.target.closest('[data-fbsec]');
+  if(fbItem){
+    const d=curDay(); if(!d) return;
+    if(!d.feedbackSel) d.feedbackSel={good:[],struggled:[],eoas:[],notes:''};
+    const sec=fbItem.dataset.fbsec;
+    const key=fbItem.dataset.fbkey;
+    if(!d.feedbackSel[sec]) d.feedbackSel[sec]=[];
+    const arr=d.feedbackSel[sec];
+    const idx=arr.indexOf(key);
+    if(idx===-1){ arr.push(key); fbItem.classList.add('on'); fbItem.querySelector('.fb-tick').innerHTML='&#10003;'; }
+    else{ arr.splice(idx,1); fbItem.classList.remove('on'); fbItem.querySelector('.fb-tick').innerHTML=''; }
+    save();
+  }
+});
+
+function saveFeedback(){
+  const d=curDay(); if(!d) return;
+  if(!d.feedbackSel) d.feedbackSel={good:[],struggled:[],eoas:[],notes:''};
+  d.feedbackSel.notes=document.getElementById('fb-notes').value;
+  save();
+}
+
+// ========== EXPORT ==========
+function generateExport(){
+  const d=curDay(); if(!d) return;
+  const c=curCand(); if(!c) return;
+  const data={
+    v:3,
+    name:c.name, depot:c.depot, gender:c.gender||'m',
+    date:d.date, day:d.day,
+    firstWithMe:d.firstWithMe||'yes',
+    prevAssessors:d.prevAssessors||{},
+    metAt:d.metAt||'FPK', metHow:d.metHow||'station',
+    nclExp:d.nclExp||'sa', diObserved:d.diObserved||'no',
+    prevDepot:d.prevDepot||'',
+    ta:d.ta||'none', taDetails:d.taDetails||null,
+    prevAdvice:d.prevAdvice||'',
+    feedback:d.feedback||'',
+    ooc:d.ooc||'',
+    advice:d.advice||'',
+    trains:(d.trains||[]).map(t=>t||null),
+    grades:d.grades||{},
+    attrGrades:d.attrGrades||{},
+    feedbackSel:d.feedbackSel||{good:[],struggled:[],eoas:[],notes:''},
+  };
+  const code='ETCS1:'+btoa(JSON.stringify(data));
+  document.getElementById('export-code-box').textContent=code;
+  toast('Code generated');
+}
+
+function copyExport(){
+  const code=document.getElementById('export-code-box').textContent;
+  if(code==='Tap Generate to create export code'){ toast('Generate first'); return; }
+  navigator.clipboard.writeText(code).then(()=>toast('Copied!')).catch(()=>toast('Copy failed'));
+}
+
+// ========== INIT ==========
+load();
+renderHome();
+
+// ========== SERVICE WORKER (offline support) ==========
+if('serviceWorker' in navigator){
+  // Inline service worker as blob
+  var swCode=[
+    'const CACHE="etcs-v1";',
+    'const ASSETS=["/"];',
+    'self.addEventListener("install",function(e){',
+    '  e.waitUntil(caches.open(CACHE).then(function(c){',
+    '    return c.addAll(ASSETS);',
+    '  }));',
+    '  self.skipWaiting();',
+    '});',
+    'self.addEventListener("activate",function(e){',
+    '  e.waitUntil(clients.claim());',
+    '});',
+    'self.addEventListener("fetch",function(e){',
+    '  e.respondWith(',
+    '    caches.match(e.request).then(function(r){',
+    '      return r || fetch(e.request).then(function(resp){',
+    '        return caches.open(CACHE).then(function(c){',
+    '          c.put(e.request,resp.clone());',
+    '          return resp;',
+    '        });',
+    '      });',
+    '    }).catch(function(){',
+    '      return caches.match(e.request);',
+    '    })',
+    '  );',
+    '});'
+  ].join("\n");
+  var blob=new Blob([swCode],{type:"text/javascript"});
+  var swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl,{scope:"/"}).then(function(reg){
+    console.log("SW registered");
+  }).catch(function(e){
+    console.log("SW registration failed (normal on file://)",e.message);
+  });
+}
+</script>
+</body>
+</html>
