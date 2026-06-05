@@ -323,21 +323,21 @@ body{font-family:-apple-system,Arial,sans-serif;background:var(--bg);color:var(-
     <div id="train-form" class="train-form">
       <div style="font-weight:700;font-size:15px;margin-bottom:12px;" id="train-form-title">Train</div>
       <div class="form-row">
-        <div><span class="form-lbl">Headcode</span><input type="text" id="t-hc" class="form-input" placeholder="9Y13" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false" oninput="this.value=this.value.toUpperCase()"></div>
+        <div><span class="form-lbl">Headcode</span><input type="text" id="t-hc" class="form-input" placeholder="9Y13" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false" oninput="this.value=this.value.toUpperCase();if(this.value.length>=4)applyHeadcodeLogic(this.value);"></div>
         <div><span class="form-lbl">Time</span><input type="text" id="t-time" class="form-input" placeholder="07:59" inputmode="numeric" oninput="autoFormatTime(this)"></div>
       </div>
       <div class="form-row">
         <div>
           <span class="form-lbl">From</span>
           <div class="stn-wrap">
-            <input type="text" id="t-from" class="form-input" placeholder="Station" oninput="filterStn('t-from','drop-from',this.value)" autocomplete="off">
+            <input type="text" id="t-from" class="form-input" placeholder="Station" oninput="filterStn('t-from','drop-from',this.value)" onfocus="showAllStn('t-from','drop-from')" autocomplete="off">
             <div class="stn-drop" id="drop-from"></div>
           </div>
         </div>
         <div>
           <span class="form-lbl">To</span>
           <div class="stn-wrap">
-            <input type="text" id="t-to" class="form-input" placeholder="Station" oninput="filterStn('t-to','drop-to',this.value)" autocomplete="off">
+            <input type="text" id="t-to" class="form-input" placeholder="Station" oninput="filterStn('t-to','drop-to',this.value)" onfocus="showAllStn('t-to','drop-to')" autocomplete="off">
             <div class="stn-drop" id="drop-to"></div>
           </div>
         </div>
@@ -543,6 +543,10 @@ const STATIONS = [
   {code:'WHP',name:'West Hampstead Thameslink'},{code:'ZFD',name:'Farringdon'},
 ];
 
+const MET_LABELS = {FPK:'Finsbury Park',KTN:'Kentish Town',WHP:'West Hampstead Thameslink',
+  STP:'St Pancras International',ZFD:'Farringdon',CTK:'City Thameslink',
+  BFR:'Blackfriars',LBG:'London Bridge',EPH:'Elephant & Castle',
+  ECR:'East Croydon',CRI:'Cricklewood'};
 const NCL_DEPOTS = ['Welwyn Garden City','Hornsey Fleet Link'];
 const ZERO_DEPOTS = ['Peterborough','Cambridge','Hitchin','Bedford','Luton','St Albans','Cricklewood','Brighton'];
 
@@ -877,9 +881,63 @@ function saveTA(){
 }
 
 // ========== STATION SEARCH ==========
+function showAllStn(inputId, dropId){
+  const drop = document.getElementById(dropId);
+  const input = document.getElementById(inputId);
+  drop.innerHTML = STATIONS.map(s=>`<div class="stn-opt" data-input="${inputId}" data-drop="${dropId}" data-code="${s.code}" data-name="${s.name}">${s.name} <span style="color:#999;font-size:11px;">${s.code}</span></div>`).join('');
+  drop.classList.add('open');
+}
+
+function applyHeadcodeLogic(hc){
+  if(!hc || hc.length < 2) return;
+  const letter = hc[1].toUpperCase();
+  const numStr = hc.slice(2);
+  const num = parseInt(numStr);
+  if(isNaN(num)) return;
+  const sb = num % 2 !== 0; // odd = southbound
+
+  // Direction
+  const dirEl = document.querySelector('[data-field="dir"]') || 
+                document.querySelector('.dir-btn.on');
+  
+  // From/To logic
+  let from = '', to = '';
+  if(sb){
+    // Southbound - default to LBG (change to ECR if going to East Croydon)
+    if('JS'.includes(letter))      { from='FPK'; to='LBG'; }
+    else if(letter==='W')          { from='FPK'; to='LBG'; }
+    else if(letter==='R')          { from='WHP'; to='LBG'; }
+    else if(letter==='T')          { from='WHP'; to='LBG'; }
+    else if(letter==='O')          { from='WHP'; to='EPH'; }
+    else if('MP'.includes(letter)) { from='WHP'; to='LBG'; }
+    else if(letter==='Y')          { from='FPK'; to='EPH'; }
+    else if(letter==='A')          { from='FPK'; to='LBG'; }
+  } else {
+    // Northbound - default from LBG (change to ECR if starting from East Croydon)
+    if('JSA'.includes(letter))     { from='LBG'; to='FPK'; }
+    else if(letter==='W')          { from='LBG'; to='FPK'; }
+    else if(letter==='M')          { from='LBG'; to='WHP'; }
+    else if(letter==='O')          { from='EPH'; to='WHP'; }
+    else if('LN'.includes(letter)) { from='LBG'; to='FPK'; }
+    else if(letter==='R')          { from='LBG'; to='WHP'; }
+    else if(letter==='Y')          { from='EPH'; to='FPK'; }
+  }
+
+  if(from){
+    const fromEl = document.getElementById('t-from');
+    const toEl = document.getElementById('t-to');
+    if(fromEl) fromEl.value = from;
+    if(toEl) toEl.value = to;
+    // Set direction using the app's own mechanism
+    trainDir = sb ? 'sb' : 'nb';
+    renderDirBadge();
+    buildTransitions();
+  }
+}
+
 function filterStn(inputId, dropId, val){
   const drop = document.getElementById(dropId);
-  if(!val||val.length<1){ drop.classList.remove('open'); return; }
+  if(!val||val.length<1){ showAllStn(inputId, dropId); return; }
   const q = val.toLowerCase();
   const matches = STATIONS.filter(s=>s.code.toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
   if(!matches.length){ drop.classList.remove('open'); return; }
@@ -906,6 +964,7 @@ document.addEventListener('click',function(e){
     const drop = document.getElementById(stnOpt.dataset.drop);
     if(drop) drop.classList.remove('open');
     updateDirection();
+    buildTransitions();
     return;
   }
   // EoA station picker
@@ -1072,7 +1131,8 @@ function openTrainForm(idx){
     if(dNotes) dNotes.classList.toggle('hidden', t.dra!=='incorrect');
     setVal('t-dra-notes', t.draNotes||'');
   } else {
-    setVal('t-hc','9');setVal('t-time','');setVal('t-from','');setVal('t-to','');
+    var now=new Date();var hh=String(now.getHours()).padStart(2,'0');var mm=String(now.getMinutes()).padStart(2,'0');
+    setVal('t-hc','9');setVal('t-time',hh+':'+mm);setVal('t-from','');setVal('t-to','');
     setVal('t-unit','700');setVal('t-mode','ATO');setVal('t-notes','');
     setVal('t-short-ma-notes','');
     const shrtMA = document.getElementById('t-short-ma');
@@ -1220,6 +1280,57 @@ function notesRow(key,label,tr){
     '<input type="text" class="notes-input" value="'+(tr[key]||'')+'" placeholder="Notes..." data-trkey="'+key+'" oninput="trainTransitions[this.dataset.trkey]=this.value"></div>';
 }
 
+
+function redSigRow(tr){
+  const v = tr.redSig||'';
+  const dd = tr.redSigDD||'';
+  let html = '<div class="trans-row"><span class="trans-lbl">Red signal on transition out?</span>'+
+    '<div class="yn-opts" data-trkey="redSig">'+
+    '<div class="yn-opt '+(v==='yes'?'on-y':'')+'" data-val="yes">Yes</div>'+
+    '<div class="yn-opt '+(v==='short'?'on-n':'')+'" data-val="short">No, But Short MA</div>'+
+    '<div class="yn-opt '+(v==='na'?'on-y':'')+'" data-val="na">N/A</div>'+
+    '</div></div>';
+  if(v==='yes'||v==='short'){
+    html += '<div class="trans-row"><span class="trans-lbl">Defensive driving?</span>'+
+      '<div class="yn-opts" data-trkey="redSigDD">'+
+      '<div class="yn-opt '+(dd==='y'?'on-y':'')+'" data-val="y">Yes</div>'+
+      '<div class="yn-opt '+(dd==='n'?'on-n':'')+'" data-val="n">No</div>'+
+      '</div></div>';
+    if(dd==='n') html += notesRow('redSigNotes','Notes',tr);
+  }
+  return html;
+}
+
+
+function transAckRow(prefix, tr){
+  // Result: successful / failed
+  const result = tr[prefix+'Result']||'';
+  const ackVia = tr[prefix+'AckVia']||'';
+  const failReason = tr[prefix+'FailReason']||'';
+  
+  let html = '<div class="trans-row"><span class="trans-lbl">Transition result</span>'+
+    '<div class="yn-opts" data-trkey="'+prefix+'Result">'+
+    '<div class="yn-opt '+(result==='ok'?'on-y':'')+'" data-val="ok">Successful</div>'+
+    '<div class="yn-opt '+(result==='fail'?'on-n':'')+'" data-val="fail">Failed</div>'+
+    '</div></div>';
+
+  if(result==='ok'){
+    html += '<div class="trans-row"><span class="trans-lbl">Acknowledged via</span>'+
+      '<div class="yn-opts" data-trkey="'+prefix+'AckVia">'+
+      '<div class="yn-opt '+(ackVia==='screen'?'on-y':'')+'" data-val="screen">Screen (Flashing Icon)</div>'+
+      '<div class="yn-opt '+(ackVia==='button'?'on-y':'')+'" data-val="button">Button (Desk)</div>'+
+      '</div></div>';
+  } else if(result==='fail'){
+    html += '<div class="trans-row"><span class="trans-lbl">Reason</span>'+
+      '<div class="yn-opts" data-trkey="'+prefix+'FailReason">'+
+      '<div class="yn-opt '+(failReason==='driver'?'on-n':'')+'" data-val="driver">Driver Error</div>'+
+      '<div class="yn-opt '+(failReason==='system'?'on-n':'')+'" data-val="system">System Failure</div>'+
+      '</div></div>';
+    html += notesRow(prefix+'FailNotes', 'Notes', tr);
+  }
+  return html;
+}
+
 function buildTransitions(){
   const wrap = document.getElementById('transitions-wrap');
   if(!wrap) return;
@@ -1238,7 +1349,9 @@ function buildTransitions(){
   // Special: from LBG = takeover mid-route
 
   const fromNorth = ['FPK','KTN','WHP'].includes(from); // starting north of ETCS area
-  const fromSouth = ['ECR','EPH'].includes(from);        // starting south of ETCS area (transition in between EPH and BFR)
+  const fromECR = from==='ECR';                          // transition in approaching LBG
+  const fromEPH = from==='EPH';                          // transition in between EPH and BFR
+  const fromSouth = fromECR || fromEPH;
   const fromLBG = from==='LBG';                          // takeover at LBG
 
   // SB train starting from north = transition in at STP
@@ -1247,14 +1360,24 @@ function buildTransitions(){
   const transInNB = nb && fromSouth;
 
   if(transInSB){
-    html+='<div class="trans-block"><div class="trans-block-title">Transition In — Southbound at St Pancras</div>';
-    html+=lvl2CheckRow('St Pancras',tr);
-    if(mode!=='Manual') html+=atoEngageRow(tr);
+    var fromName=MET_LABELS[from]||from;
+    html+='<div class="trans-block"><div class="trans-block-title">Transition In — Southbound ('+fromName+' → St Pancras)</div>';
+    html+=lvl2CheckRow(fromName,tr);
+    html+=transAckRow('transIn',tr);
+    if(tr.transInResult!=='fail' && mode!=='Manual') html+=atoEngageRow(tr);
+    if(tr.transInResult==='fail') html+='<div class="info-box">Transition failed — train remains in NTC. No ATO available, no transition out.</div>';
     html+='</div>';
   } else if(transInNB){
-    html+='<div class="trans-block"><div class="trans-block-title">Transition In — Northbound at London Bridge</div>';
-    html+=lvl2CheckRow('London Bridge',tr);
-    if(mode!=='Manual') html+=atoEngageRow(tr);
+    if(fromECR){
+      html+='<div class="trans-block"><div class="trans-block-title">Transition In — Northbound (Approaching LBG)</div>';
+      html+=lvl2CheckRow('London Bridge',tr);
+    } else {
+      html+='<div class="trans-block"><div class="trans-block-title">Transition In — Northbound (Leaving EPH towards BFR)</div>';
+      html+=lvl2CheckRow('EPH',tr);
+    }
+    html+=transAckRow('transIn',tr);
+    if(tr.transInResult!=='fail' && mode!=='Manual') html+=atoEngageRow(tr);
+    if(tr.transInResult==='fail') html+='<div class="info-box">Transition failed — train remains in NTC. No ATO available, no transition out.</div>';
     html+='</div>';
   } else if(fromLBG){
     // Takeover at LBG - special case
@@ -1278,6 +1401,8 @@ function buildTransitions(){
   // === TRANSITION OUT ===
   // SB train: exits ETCS area towards EPH/ECR or terminates in core
   // NB train: exits ETCS area towards FPK/WHP/KTN or terminates in core
+
+  if(tr.transInResult==='fail'){ wrap.innerHTML=html; return; }
 
   const toNorth = ['FPK','KTN'].includes(to);  // NB train exiting north via Canal Tunnel
   const toWHP   = to==='WHP'||to==='CRI';       // NB train exiting via Dock Junction
@@ -1304,20 +1429,24 @@ function buildTransitions(){
     // NB exiting via Canal Tunnel towards FPK
     html+='<div class="trans-block"><div class="trans-block-title">Transition Out — Route C (Canal Tunnel)</div>';
     if(mode!=='Manual') html+=atoHandbackRow(tr);
-    html+=ynRow('redSigCapture','Red signal captured on transition out?',tr);
-    if(tr.redSigCapture==='y') html+=notesRow('redSigNotes','Signal number and notes',tr);
+    html+=transAckRow('transOut',tr);
+    html+=redSigRow(tr);
     html+=handoverRows(tr, false);
     html+='</div>';
   } else if(toWHP){
     // NB exiting via Dock Junction towards WHP/CRI
     html+='<div class="trans-block"><div class="trans-block-title">Transition Out — Route D (Dock Junction)</div>';
     if(mode!=='Manual') html+=atoHandbackRow(tr);
+    html+=transAckRow('transOut',tr);
+    html+=redSigRow(tr);
     html+=handoverRows(tr, false);
     html+='</div>';
   } else if(toSouth){
     // SB exiting south towards EPH/ECR
     html+='<div class="trans-block"><div class="trans-block-title">Transition Out — Southbound towards '+to+'</div>';
     if(mode!=='Manual') html+=atoHandbackRow(tr);
+    html+=transAckRow('transOut',tr);
+    html+=redSigRow(tr);
     if(to==='EPH'){
       html+='<div class="info-box">Warning: poorly sighted signal between BFR and Elephant & Castle. Be prepared for a Red on transition out.</div>';
     }
@@ -1332,8 +1461,8 @@ function lvl2CheckRow(station,tr){
   const v=tr.lvl2Check||'';
   let html='<div class="trans-row"><span class="trans-lbl">Did they check Level 2 was enabled at '+station+'?</span>'+
     '<div class="yn-opts" data-trkey="lvl2Check">'+
-    '<div class="yn-opt '+(v==='already'?'on-y':'')+'" data-val="already">Yes \u2014 already on</div>'+
-    '<div class="yn-opt '+(v==='enabled'?'on-y':'')+'" data-val="enabled">Yes \u2014 was off, enabled it</div>'+
+    '<div class="yn-opt '+(v==='already'?'on-y':'')+'" data-val="already">Yes — Enabled</div>'+
+    '<div class="yn-opt '+(v==='enabled'?'on-y':'')+'" data-val="enabled">Yes — Inhibited, Enabled It</div>'+
     '<div class="yn-opt '+(v==='no'?'on-n':'')+'" data-val="no">No</div>'+
     '</div></div>';
   if(v==='enabled') html+='<div class="info-box">Level 2 was inhibited \u2014 correctly identified and enabled.</div>';
@@ -1355,15 +1484,15 @@ function atoEngageRow(tr){
 }
 
 function atoHandbackRow(tr){
-  const v=tr.atoBreaking||'';
-  let html='<div class="trans-row"><span class="trans-lbl">Was ATO braking at the ATO border?</span>'+
-    '<div class="yn-opts" data-trkey="atoBreaking">'+
-    '<div class="yn-opt '+(v==='n'?'on-y':'')+'" data-val="n">No \u2014 clean handback</div>'+
-    '<div class="yn-opt '+(v==='y'?'on-n':'')+'" data-val="y">Yes \u2014 was braking</div>'+
+  const v=tr.atoBorder||'';
+  let html='<div class="trans-row"><span class="trans-lbl">ATO border</span>'+
+    '<div class="yn-opts" data-trkey="atoBorder">'+
+    '<div class="yn-opt '+(v==='ok'?'on-y':'')+'" data-val="ok">Took Over Correctly</div>'+
+    '<div class="yn-opt '+(v==='braking'?'on-n':'')+'" data-val="braking">Took Over In Braking Curve</div>'+
+    '<div class="yn-opt '+(v==='prompt'?'on-n':'')+'" data-val="prompt">Needed Prompting</div>'+
     '</div></div>';
-  if(v==='y'){
-    html+=ynRow('tookOverBraking','Did they take over during braking curve?',tr);
-    if(tr.tookOverBraking==='y') html+=notesRow('brakingNotes','Notes \u2014 should not take over during braking',tr);
+  if(v==='braking'||v==='prompt'){
+    html+=notesRow('atoBorderNotes','Notes',tr);
   }
   return html;
 }
@@ -1374,9 +1503,9 @@ function handoverRows(tr, inLevel2){
   const cv=tr.confirmRelieving||'';
   let html='<div class="trans-row"><span class="trans-lbl">Confirm relieving driver Level 2 trained?</span>'+
     '<div class="yn-opts" data-trkey="confirmRelieving">'+
-    '<div class="yn-opt '+(cv==='lvl2'?'on-y':'')+'" data-val="lvl2">Yes \u2014 Level 2</div>'+
-    '<div class="yn-opt '+(cv==='ntc'?'on-n':'')+'" data-val="ntc">Yes \u2014 NTC</div>'+
-    '<div class="yn-opt '+(cv==='no'?'on-na':'')+'" data-val="no">Didn\u2019t confirm</div>'+
+    '<div class="yn-opt '+(cv==='lvl2'?'on-y':'')+'" data-val="lvl2">Yes — Level 2</div>'+
+    '<div class="yn-opt '+(cv==='ntc'?'on-n':'')+'" data-val="ntc">Yes — NTC</div>'+
+    '<div class="yn-opt '+(cv==='no'?'on-na':'')+'" data-val="no">Didn’t Confirm</div>'+
     '</div></div>';
   if(cv==='no') html+=notesRow('confirmNotes','Notes \u2014 needed prompting',tr);
 
