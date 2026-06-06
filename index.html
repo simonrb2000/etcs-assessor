@@ -1389,8 +1389,11 @@ function buildTransitions(){
       '<div class="yn-opt '+(tv==='lvl2'?'on-y':'')+'" data-val="lvl2">Level 2</div>'+
       '</div></div>';
     if(tv==='ntc'){
-      html+='<div class="info-box">NTC on takeover — will transition up the BFR spur. Enable Level 2 at WHP.</div>';
-      html+=lvl2CheckRow('WHP',tr);
+      html+='<div class="info-box">NTC on takeover — drive NTC to BFR Spur where Level 2 transition in occurs.</div>';
+      html+=lvl2CheckRow('LBG',tr);
+      html+=transAckRow('transIn',tr);
+      if(tr.transInResult!=='fail' && mode!=='Manual') html+=atoEngageRow(tr);
+      if(tr.transInResult==='fail') html+='<div class="info-box">Transition failed — train remains in NTC. No ATO available, no transition out.</div>';
     } else if(tv==='lvl2'){
       html+='<div class="info-box">Already Level 2 — running brake test required before ATO assessment.</div>';
       html+=ynRow('rbtDone','Running brake test completed?',tr);
@@ -1806,7 +1809,7 @@ function generateExport(){
     attrGrades:d.attrGrades||{},
     feedbackSel:d.feedbackSel||{good:[],struggled:[],eoas:[],notes:''},
   };
-  const code='ETCS1:'+btoa(JSON.stringify(data));
+  const code='ETCS1:'+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
   document.getElementById('export-code-box').textContent=code;
   toast('Code generated');
 }
